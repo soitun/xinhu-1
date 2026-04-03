@@ -150,3 +150,7 @@ a.webbtn:link,a.webbtn:visited,.webbtn{color:#ffffff;opacity:1; background-color
   background-color: rgba(0, 0, 0, 0.1);
   border-radius: 5px;
 }
+
+.list-items-group .list-items:last-child{border-bottom:none;}
+.list-items{padding:6px 5px;border-bottom:var(--border);line-height:20px;text-align:left}
+.tishi{color:#888888;font-size:12px;padding:3px}

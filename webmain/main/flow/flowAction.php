@@ -1,7 +1,7 @@
 <?php
 class flowClassAction extends Action
 {
-	private $modeid,$moders,$isflow;
+	private $modeid,$moders,$isflow,$mmoders,$xiaoshu;
 	
 	public function loaddataAjax()
 	{
@@ -122,6 +122,7 @@ class flowClassAction extends Action
 		}
 		$rows['tables']= $tabs;
 		if($cans['where'])$rows['where'] = htmlspecialchars_decode($cans['where']);
+		
 		return array(
 			'rows' => $rows
 		);
@@ -733,7 +734,7 @@ class mode_'.$modenum.'ClassAction extends inputAction{
 	
 	public function yubustsin($rows, $yczd)
 	{
-		$zhang  = array('textarea','htmlediter','uploadfile','uploadimg','changedeptusercheck');
+		$zhang  = array('textarea','htmlediter','uploadfile','uploadimg','changedeptusercheck','relevant');
 		$s = '<table width="100%" border="0"><tbody><tr class="autoyijianview">';
 		$xuo = 0;
 		
@@ -798,6 +799,7 @@ class mode_'.$modenum.'ClassAction extends inputAction{
 		if($rows){
 			$flow 	= m('flow')->initflow($this->moders['num']);
 			$mbil 	= m('flowbill');
+			$mcom 	= m('company');
 			foreach($rows as $k=>$rs){
 				$zt 	= '';
 				if(isset($rs['status']))$zt = $rs['status'];
@@ -829,6 +831,13 @@ class mode_'.$modenum.'ClassAction extends inputAction{
 				}
 				$narr['status']		= $flow->getstatus($rs,'',$otehsr,1);
 				$narr['chushu']		= $flow->flogmodel->rows("`table`='".$flow->mtable."' and `mid`='".$rs['id']."'");
+				$comid = arrvalue($rs,'comid');
+				$narr['comid'] = $comid;
+				if($comid){
+					$cmrs  = $mcom->getXinxi($rs['comid']);
+					if($cmrs)$narr['comid']		= $cmrs['id'].'.'.$cmrs['name'];
+				}
+				
 				
 				$arr[] = $narr;
 			}
@@ -878,14 +887,19 @@ class mode_'.$modenum.'ClassAction extends inputAction{
 		
 		$mid 	= $cans['mid'];
 		$this->mmoders 	= m('flow_set')->getone($mid);
-		$tablessa = explode(',', $this->mmoders['tables']);
-		if($iszb>0){
-			$tabsss = $this->rock->arrvalue($tablessa, $iszb-1);
-			if(isempt($tabsss))return '模块没有设置第'.$iszb.'个多行子表';
+		if(!isempt($this->mmoders['tables'])){
+			$tablessa = explode(',', $this->mmoders['tables']);
+			if($iszb>0){
+				$tabsss = $this->rock->arrvalue($tablessa, $iszb-1);
+				if(isempt($tabsss))return '模块没有设置第'.$iszb.'个多行子表';
+			}
 		}
 		if(m($table)->rows("`mid`='$mid' and `iszb`='$iszb' and `fields`='$fields' and `id`<>'$id'")>0){
 			return '字段['.$fields.']已存在了';
 		}
+
+		$notypea= array('htmlediter','relevant');
+		if($iszb > 0 && in_array($type, $notypea))return '子表暂不支持此字段元素类型';
 	}
 	
 	//保存字段判断，自动创建字段

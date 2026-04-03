@@ -110,7 +110,8 @@ class mode_knowtraimClassAction extends inputAction{
 		$mdos = m('flow:knowtraim');
 		foreach($rows as $k=>$rs){
 			$zt = $mdos->getstatestr($rs['state']);
-			$rows[$k]['startdt'] = ''.substr($rs['startdt'],5,11).'至'.substr($rs['enddt'],5,11).'('.$zt.')';
+			//$rows[$k]['startdt'] = ''.substr($rs['startdt'],5,11).'至'.substr($rs['enddt'],5,11).'('.$zt.')';
+			$rows[$k]['startdt'] = ''.$rs['startdt'].'至'.$rs['enddt'].'('.$zt.')';
 			if($rs['fenshu']=='0' && $rs['isks']==0)$rows[$k]['fenshu']='';
 			if(!isempt($rs['ksedt']))$rows[$k]['ksedt'] = ''.substr($rs['kssdt'],5,11).'至'.substr($rs['ksedt'],5,11).'';
 			$strs 				= ($rs['isks']=='1') ? '<font color=green>已考试</font>' : '<font color=red>未考试</font>';

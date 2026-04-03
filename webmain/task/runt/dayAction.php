@@ -15,6 +15,12 @@ class dayClassAction extends runtAction
 		
 		$this->crmrun();
 		
+		//物业费生成2026-03-14
+		if($this->moderock('wyitem')){
+			$obj = m('flow')->initflow('wyitem');
+			if(method_exists($obj, 'createfee'))$obj->createfee();
+		}
+		
 		return 'success';
 	}
 	

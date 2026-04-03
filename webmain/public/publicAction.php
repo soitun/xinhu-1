@@ -163,6 +163,11 @@ class publicClassAction extends ActionNot{
 		$otype = (int)$this->get('otype','0');
 		$this->smartydata['id'] = $id;
 		$this->smartydata['otype'] = $otype;
+		$urlbj = getconfig('officebj_url');
+		
+		//说明是自己部署编辑平台用旧的页面
+		if(!isempt($urlbj) && !contain($urlbj,'rockoa.com') && getconfig('systype') != 'dev')
+			$this->displayfile = ''.P.'/public/tpl_public_fileedit_old.html';
 	}
 	
 	/**

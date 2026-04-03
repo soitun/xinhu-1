@@ -20,6 +20,8 @@ $(document).ready(function(){
 		},{
 			text:'状态',dataIndex:'status',sortable:true
 		},{
+			text:'所属单位',dataIndex:'comid',sortable:true
+		},{
 			text:'处理记录',dataIndex:'chushu',renderer:function(v,d,i){
 				var s='&nbsp;';
 				if(v>0)s=''+v+'<a href="javascript:;" onclick="openlogs{rand}('+i+')">查看</a>';

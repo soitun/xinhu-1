@@ -68,6 +68,9 @@ class emailClassAction extends Action
 	public function testsendAjax()
 	{
 		$msg 	= m('email')->sendmail_test();
+		$txt 	= 'err';
+		if($msg=='ok')$txt='ok';
+		$this->option->setval('email_teststate@-1', $txt);
 		echo $msg;
 	}
 	

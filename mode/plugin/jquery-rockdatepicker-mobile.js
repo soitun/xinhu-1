@@ -66,7 +66,7 @@
 			if(h<winHb())h=winHb();
 		
 			var s = '<div pickermobile="qx" id="pickermobile_div0" style="background:rgba(0,0,0,0.5);width:100%;height:'+h+'px;z-index:9;position:absolute;text-align:center;left:0px;top:0px">';
-			var inst = 'background:none;border:none;padding:10px 8px;color:#1389D3;font-size:20px';
+			var inst = 'background:none;border:none;padding:10px 8px;color:'+maincolor+';font-size:20px';
 			s+='</div>';
 			s+='<div id="pickermobile_div1" style="width:100%;background:white;position:fixed;top:30%;z-index:10;">';
 			s+='<div style="margin:5px;"><table width="100%"><tr>';
@@ -110,7 +110,7 @@
 			s+='</tr>';
 			
 			s+='</table></div>';
-			s+='<div style="padding-bottom:20px"><table width="100%"><tr><td width="25%" align="center"><input type="button" value="清空"  pickermobile="qk" style="background:none;border:none;padding:5px 10px;color:#888888"></td><td width="25%" align="center"><input type="button" value="现在"  pickermobile="now" style="background:none;border:none;padding:5px 10px;color:#1389D3"></td><td width="25%" align="center"><input type="button" value="确定" pickermobile="ok"  style="background:none;border:none;padding:5px 10px;color:#1389D3"></td><td width="25%" align="center"><input type="button" value="取消" pickermobile="qx"  style="background:none;border:none;padding:5px 10px;color:#888888"></td></tr></table></div>';
+			s+='<div style="padding-bottom:20px"><table width="100%"><tr><td width="25%" align="center"><input type="button" value="清空"  pickermobile="qk" style="background:none;border:none;padding:5px 10px;color:#888888"></td><td width="25%" align="center"><input type="button" value="现在"  pickermobile="now" style="background:none;border:none;padding:5px 10px;color:'+maincolor+'"></td><td width="25%" align="center"><input type="button" value="确定" pickermobile="ok"  style="background:none;border:none;padding:5px 10px;color:'+maincolor+'"></td><td width="25%" align="center"><input type="button" value="取消" pickermobile="qx"  style="background:none;border:none;padding:5px 10px;color:#888888"></td></tr></table></div>';
 			s+='</div>';
 			$('body').append(s);
 			$('[pickermobile]').click(function(){

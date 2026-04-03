@@ -5,6 +5,7 @@
 <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="yes" />
+<meta name="mobile-web-app-capable" content="yes">
 <title><?=$da['pagetitle']?></title>
 <link rel="shortcut icon" href="favicon.ico" />
 <link rel="stylesheet" type="text/css" href="webmain/css/cssm.css">
@@ -328,10 +329,11 @@ if($da['arr']['isplview']=='1'){
 	<?php 
 	foreach($logarr as $k=>$rs){
 		$atrs =  ($logcount==$k+1) ? 'style="border:none"':'';
+		$shds = ($rs['valid']=='0') ? 'style="text-decoration: line-through"' : ''; 	
 		$s = '<tr '.$atrs.' valign="top">';
 		$s.= '<td align="right" width="50"><img src="'.$rs['face'].'" class="faces"></td>';
 		$s.= '<td>';
-		$s.= '<div class="name">'.$rs['name'].'<span class="act">['.$rs['actname'].']</span><font color="'.$rs['color'].'">'.$rs['statusname'].'</font><span class="dt">('.$rs['optdt'].')</span></div>';
+		$s.= '<div class="name">'.$rs['name'].'<span class="act" '.$shds.'>['.$rs['actname'].']</span><font color="'.$rs['color'].'">'.$rs['statusname'].'</font><span class="dt">('.$rs['optdt'].')</span></div>';
 		if(!isempt($rs['explain']))$s.= '<div class="sm">'.$rs['explain'].'</div>';
 		$s.= '</td>';
 		$s.= '</tr>';

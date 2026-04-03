@@ -76,15 +76,21 @@
 				'btnobj':o1
 			});
 		},
-		getacturl:function(act){
-			return js.getajaxurl(act,'mode_'+modenum+'|input','flow',{'modeid':modeid});
+		getacturl:function(act,bh){
+			if(!bh)bh = modenum;
+			return js.getajaxurl(act,'mode_'+bh+'|input','flow',{'modeid':modeid});
 		},
-		changatype:function(o1,lx){
+		onchangatype:function(){},
+		changatype:function(o1,i1){
+			var d = this.atypearr[parseFloat(i1)];
+			let lx= d.num;atype = lx;
 			$("button[id^='changatype{rand}']").removeClass('active');
 			$('#changatype{rand}_'+lx+'').addClass('active');
 			a.setparams({atype:lx},true);
-			var tit = $(o1).html();if(tit.indexOf(modename)<0)tit=modename+'('+tit+')';
+			var tit = d.name;if(tit.indexOf(modename)<0)tit=modename+'('+tit+')';
+			if(d.stotal){$(o1).html(d.name);d.stotal = 0;}
 			nowtabssettext(tit);
+			this.onchangatype(d);
 		},
 		init:function(){
 			$('#key_{rand}').keyup(function(e){
@@ -143,8 +149,11 @@
 			if(d.isdaochu)$('#daobtn_{rand}').show();
 			if(d.isdaoru)$('#daoruspan_{rand}').show();
 			var d1 = d.atypearr,len=d1.length,i,str='';
+			this.atypearr = d1;
 			for(i=0;i<len;i++){
-				str+='<button class="btn btn-default" click="changatype,'+d1[i].num+'" id="changatype{rand}_'+d1[i].num+'" type="button">'+d1[i].name+'</button>';
+				str+='<button class="btn btn-default" click="changatype,'+i+'" id="changatype{rand}_'+d1[i].num+'" type="button">'+d1[i].name+'';
+				if(d1[i].stotal)str+='<span class="badge">'+d1[i].stotal+'</span>';
+				str+='</button>';
 			}
 			$('#changatype{rand}').html(str);
 			$('#changatype{rand}_'+atype+'').addClass('active');

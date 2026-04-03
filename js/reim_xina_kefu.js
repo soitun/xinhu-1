@@ -102,7 +102,7 @@ reim.kefu = {
 		}
 	},
 	onmessage:function(d){
-		console.log(d);
+		//console.log(d);
 		var lx=d.type;
 		if(lx=='chehui'){
 			$('#qipaocont_mess_'+d.messid+'').html(js.getmsg(jm.base64decode(d.mess),'green'));

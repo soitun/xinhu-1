@@ -5,6 +5,7 @@
 <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="yes" />
+<meta name="mobile-web-app-capable" content="yes">
 <title><?=$da['pagetitle']?></title>
 <link rel="shortcut icon" href="favicon.ico" />
 <?php
@@ -12,7 +13,7 @@ if($stype==''){
 	$jqurl = 'js/jquery.js';
 	if(arrvalue($da['arr']['flowinfor'],'ischeck')==1)$jqurl='web/res/js/jquery.1.9.1.min.js';
 ?>
-<link rel="stylesheet" type="text/css" href="<?=$da['p']?>/css/css.css?<?=$nowtime?>">
+<link rel="stylesheet" type="text/css" href="<?=$da['p']?>/css/rock.css?<?=$nowtime?>">
 <script type="text/javascript" src="<?=$jqurl?>"></script>
 <script type="text/javascript" src="js/js.js"></script>
 <script type="text/javascript" src="js/base64-min.js"></script>
@@ -44,7 +45,7 @@ echo c('color')->getApptheme(false);
 td.tdys1{border:1px #e5e5e5 solid;border:var(--border);text-align:center;padding:0px 5px}
 .createtable{width:90%}
 .menulls{position:absolute;left:1px;top:10px}
-.menullss{position:absolute;left:1px;top:32px; background-color:white; border:var(--border);border-bottom:0px;display:none}
+.menullss{position:absolute;left:1px;top:32px; background-color:white; border:var(--border);border-bottom:0px;display:none;boder-radius:5px}
 .menullss ul{list-style-type:none}
 .menullss li{padding:5px 10px;border-bottom:var(--border);cursor:pointer}
 .menullss li:hover{ background-color:#f1f1f1}
@@ -80,8 +81,8 @@ if($stype!=''){
 <div align="center">
 <div style="width:<?=$da['xiangwidth']?>px;position:relative;background:white" id="maindiv" align="left">
 	<?php if($stype==''){?>
-	<div class="menulls"><input id="showmenu" style="background-color:#888888;font-size:12px;border-radius:5px" class="webbtn" value="操作V" type="button"></div>
-	<div class="menullss"><ul><li lx="0">打印全部...</li><li lx="6">只打印内容...</li>
+	<div class="menulls"><input id="showmenu" style="background-color:#888888;font-size:12px;border-radius:5px;height:auto" class="webbtn" value="操作V" type="button"></div>
+	<div class="menullss box"><ul><li lx="0">打印全部...</li><li lx="6">只打印内容...</li>
 	<?php
 	if($da['issetprint'])echo '<li lx="8">根据模版打印</li>';
 	echo '<li lx="5">另存为word...</li>';
@@ -187,7 +188,7 @@ if($stype!=''){
 				?>
 				<tr >
 					<td><?=$k+1?></td>
-					<td><?=$rs['actname']?></td>
+					<td <?php if($rs['valid']=='0')echo 'style="text-decoration: line-through"';?>><?=$rs['actname']?></td>
 					<td><?=$rs['name']?></td>
 					<td style="color:<?=$rs['color']?>"><?=$rs['statusname']?></td>
 					<td><div  align="left"><?=$rs['explain']?></div></td>
@@ -263,7 +264,7 @@ if($stype!=''){
 				<td class="tdys1"><div  align="right" style="color:#555555">抄送</div></td>
 				<td class="tdys1" style="padding:5px"><div align="left">
 				<input name="bzcslx" type="hidden" value="<?=$flowinfor['ischao']?>">
-				<table width="98%" cellpadding="0" border="0"><tr><td width="100%"><input placeholder="选择了抄送对应人" class="inputs" style="width:98%" id="bzchaosongname" readonly type="text" name="bzchaosongname"><input name="bzchaosongnameid" id="bzchaosongname_id" type="hidden"></td><td nowrap><a href="javascript:;" onclick="js.changeclear('bzchaosongname')" class="webbtn">×</a><a href="javascript:;" onclick="js.changeuser('bzchaosongname','changeusercheck','',{changerange:'<?=$flowinfor['ischaofwid']?>'})" class="webbtn">选择</a></td></tr></table>
+				<table width="98%" cellpadding="0" border="0"><tr><td width="100%"><input placeholder="选择了抄送对应人" class="inputs" style="width:98%" id="bzchaosongname" readonly type="text" name="bzchaosongname"><input name="bzchaosongnameid" id="bzchaosongname_id" type="hidden"></td><td nowrap><button type="button" onclick="js.changeclear('bzchaosongname')" class="webbtn">×</button><button type="button" onclick="js.changeuser('bzchaosongname','changeusercheck','',{changerange:'<?=$flowinfor['ischaofwid']?>'})" class="webbtn">选择</button></td></tr></table>
 				</div></td>
 			</tr>	
 			<?php 
@@ -327,7 +328,7 @@ if($stype!=''){
 			<tr style="display:none" id="zhuangdiv">
 				<td class="tdys1"><div  align="right" style="color:#555555">转给</div></td>
 				<td class="tdys1" style="padding:5px"><div align="left">
-				<table width="98%" cellpadding="0" border="0"><tr><td width="100%"><input placeholder="选择了就会转办给对应人" class="inputs" style="width:98%" id="zhuanbanname" readonly type="text" name="zhuanbanname"><input name="zhuanbannameid" id="zhuanbanname_id" type="hidden"></td><td nowrap><a href="javascript:;" onclick="js.changeclear('zhuanbanname')" class="webbtn">×</a><a href="javascript:;" onclick="js.changeuser('zhuanbanname','changeuser<?=$flowinfor['zbrangelx']?>','',{changerange:'<?=$flowinfor['zbrangeid']?>'})" class="webbtn">选择</a></td></tr></table>
+				<table width="98%" cellpadding="0" border="0"><tr><td width="100%"><input placeholder="选择了就会转办给对应人" class="inputs" style="width:98%" id="zhuanbanname" readonly type="text" name="zhuanbanname"><input name="zhuanbannameid" id="zhuanbanname_id" type="hidden"></td><td nowrap><button type="button" onclick="js.changeclear('zhuanbanname')" class="webbtn">×</button><button type="button" onclick="js.changeuser('zhuanbanname','changeuser<?=$flowinfor['zbrangelx']?>','',{changerange:'<?=$flowinfor['zbrangeid']?>'})" class="webbtn">选择</button></td></tr></table>
 				</div></td>
 			</tr>	
 			<?php 

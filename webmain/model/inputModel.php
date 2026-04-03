@@ -74,5 +74,4 @@ class inputClassModel extends Model
 		}
 		return $str;
 	}
-
 }

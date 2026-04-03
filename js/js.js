@@ -199,6 +199,7 @@ js.open=function(url,w,h,wina,can,wjcan){
 	if(!w)w=750;if(!h)h=500;
 	var l=(screen.width-w)*0.5,t=(screen.height-h)*0.5-50,rnd = parseInt(Math.random()*50);
 	if(rnd%2==0){l=l+rnd;t=t-rnd;}else{l=l-rnd;t=t+rnd;}
+	w = parseInt(w);h = parseInt(h);l = parseInt(l);t = parseInt(t);
 	if(!can)can={};
 	var s='resizable=yes,scrollbars=yes,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,status=no';
 	var a1={'left':''+l+'px','top':''+t+'px','width':''+w+'px','height':''+h+'px'};
@@ -1255,7 +1256,7 @@ js.chajian = function(type, cans){
 	if(!$[type]){
 		js.importjs('mode/plugin/jquery-'+type+'.js?'+js.getrand()+'', function(){$[type](cans);});
 	}else{
-		$[type](cans);
+		return $[type](cans);
 	}
 }
 
@@ -1266,4 +1267,18 @@ function showDebug(strv,col){
 	if(typeof(strv)!='string')strv = JSON.stringify(strv);
 	var str = '<div temp="divt" onclick="$(\'div[temp=divt]\').remove()" style="background:rgba(0,0,0,0.8);font-size:12px;position:fixed;right:0px;top:'+hei+'px;padding:5px;z-index:99;word-wrap:break-word;word-break:break-all;white-space:normal;color:'+col+'">['+js.now('now')+']'+strv+'</div>';
 	$('body').append(str);
+}
+
+js.imgview = function(o1, dbo){
+	var dz  = (typeof(o1)=='string')? o1 : o1.src;
+	var src = dz.replace('_s.','.');
+	var sfun = function(){$.imgview({url:src,downbool:dbo,ismobile:ismobile==1});}
+	var curl= 'web/res/fontawesome/css/font-awesome.min.css';
+	var cobj= $("link[href^='"+curl+"']");
+	if(cobj.length==0)js.importcss(curl);
+	if(!$.imgview){
+		js.importjs('web/res/js/jquery-imgview.js?'+js.getrand()+'', function(){sfun();});
+	}else{
+		sfun();
+	}
 }

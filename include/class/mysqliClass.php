@@ -19,7 +19,12 @@ class mysqliClass extends mysql{
 	
 	protected function querysql($sql)
 	{
-		$roboll = $this->conn->query($sql);
+		$roboll = false;
+		try{
+			$roboll = $this->conn->query($sql);
+		} catch (mysqli_sql_exception $e) {
+			//echo "SQL 错误: " . $e->getMessage();
+		}
 		if(!$roboll)$this->setError($this->conn->error, $sql);
 		return $roboll;
 	}

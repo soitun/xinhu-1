@@ -438,8 +438,8 @@ var c={
 			js.setmsg();
 			var len = arr.length,i,j;
 			data=da.data;
-			for(i=0;i<len;i++)this.showvalue(arr[i],da.data);
 			isedit=da.isedit;
+			for(i=0;i<len;i++)this.showvalue(arr[i],da.data);
 			if(form('base_name'))form('base_name').value=da.user.name;
 			if(form('base_deptname'))form('base_deptname').value=da.user.deptname;
 			js.downupshow(da.filers,'fileidview', (isedit==0));
@@ -763,6 +763,9 @@ var c={
 				form(fid).checked = (val=='1');
 			}else if(flx=='htmlediter' && this.editorobj[fid]){
 				this.editorobj[fid].html(val);
+			}else if(flx=='relevant'){
+				if(form(fid))form(fid).value=val;
+				if(da[fid+'_arr'])js.chajian('rockrelevant', {'fname':fid,'ctype':'show','isedit':isedit,'data':da[fid+'_arr']});
 			}else if(flx.substr(0,6)=='change'){
 				if(form(fid))form(fid).value=val;
 				fid = fa.data;

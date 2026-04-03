@@ -2,6 +2,7 @@
 class fileClassModel extends Model
 {
 	public $fileall,$mimitype;
+	public $openmode = 0; //打开模式
 	
 	public function initModel()
 	{
@@ -160,11 +161,12 @@ class fileClassModel extends Model
 		if(!isempt($rs['filenum']))$isdel=true;
 		if(arrvalue($rs,'filepathout'))$isdel=true;
 		
-		$fstr .='<img src="'.$imurl.'" align="absmiddle" height=20 width=20>';
+		$fstr .='<img src="'.$imurl.'" onclick="js.imgview(this.src,false)" align="absmiddle" height=20 width=20>';
+		
 		if($isdel){
-			$fstr .=' '.$rs['filename'].'';
+			$fstr .=' <span class="wrap">'.$rs['filename'].'</span>';
 		}else{
-			$fstr .=' <s>'.$rs['filename'].'</s>';
+			$fstr .=' <s class="wrap">'.$rs['filename'].'</s>';
 		}
 		
 		$fstr .=' <span style="color:#aaaaaa;font-size:12px">('.$rs['filesizecn'].')</span>';

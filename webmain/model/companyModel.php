@@ -75,4 +75,17 @@ class companyClassModel extends Model
 	{
 		m('userract')->update("`company`='$name'","`companyid`='$id'");//员工合同
 	}
+	
+	/**
+	*	所属单位名称
+	*/
+	public function comidname($comid)
+	{
+		if($comid && is_numeric($comid)){
+			$mors = $this->getXinxi($comid);
+			return arrvalue($mors, 'name');
+		}else{
+			 return $comid;
+		}
+	}
 }

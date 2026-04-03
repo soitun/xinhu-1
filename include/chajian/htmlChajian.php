@@ -126,27 +126,27 @@ class htmlChajian extends Chajian{
 	{
 		if($lx=='')$lx='xls';
 		$borst  = '.5pt';
-		$sty 	= 'style="white-space:nowrap;border:'.$borst.' solid #000000;font-size:12px;"';
+		$sty 	= 'style="white-space:nowrap;border:'.$borst.' solid #000000;font-size:12px;{0}"';
 		$s 		= '<html><head><meta charset="utf-8"><title>'.$title.'</title></head><body>';
 		$s 	   .= '<table border="0" style="border-collapse:collapse;">';
 		$hlen 	= 1;
-		$s1='<tr height="30"><td '.$sty.'>序号</td>';
+		$s1='<tr height="30"><td '.$this->getstyle($sty).'>序号</td>';
 		foreach($headArr as $na){
 			$hlen++;
-			$s1.='<td '.$sty.'>'.$na.'</td>';
+			$s1.='<td '.$this->getstyle($sty).'>'.$na.'</td>';
 		}
 		$s1.='</tr>';
-		$s.='<tr height="40"><td '.$sty.' colspan="'.$hlen.'">'.$title.'</td></tr>';
+		$s.='<tr height="40"><td '.$this->getstyle($sty).' colspan="'.$hlen.'">'.$title.'</td></tr>';
 		$s.=$s1;
 		foreach($rows as $k=>$rs){
 			$atr = '';
 			if(isset($rs['trbgcolor']))$atr=' bgcolor="'.$rs['trbgcolor'].'"';
 			$s.='<tr height="26"'.$atr.'>';
-			$s.='<td align="center" '.$sty.'>'.($k+1).'</td>';
+			$s.='<td align="center" '.$this->getstyle($sty).'>'.($k+1).'</td>';
 			foreach($headArr as $kf=>$na){
 				$val = '';
 				if(isset($rs[$kf]))$val=$rs[$kf];
-				$s.='<td '.$sty.'>'.$this->execelval($val).'</td>';
+				$s.='<td '.$this->getstyle($sty,'mso-number-format:\@').'>'.$val.'</td>';
 			}
 			$s.='</tr>';
 		}
@@ -166,13 +166,19 @@ class htmlChajian extends Chajian{
 		$bo 		= $this->rock->createtxt(iconv('utf-8','gb2312',$url), $s);
 		return $url;
 	}
+	
 	//超过11位的数字就会变型处理
 	private function execelval($str)
 	{
+		return $str;
 		if($str!=''){
 			if(is_numeric($str) && strlen($str)>11)$str=''.$str.'&nbsp;';
 		}
 		return $str;
+	}
+	private function getstyle($sty, $vs='')
+	{
+		return str_replace('{0}',$vs,$sty);
 	}
 	
 	

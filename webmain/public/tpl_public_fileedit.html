@@ -8,13 +8,14 @@
 <script type="text/javascript" src="js/js.js"></script>
 <script type="text/javascript" src="js/base64-min.js"></script>
 <script>
-var id = '<?=$da['id']?>',otype='<?=$da['otype']?>',nowda,ldata;
+var id = '<?=$da['id']?>',otype='<?=$da['otype']?>',nowda,ldata,erand;
 function initbody(){
+	erand = js.request('erand');//编辑号
 	js.setmsg('初始中...');
 	
 	$.ajax({
 		type:'get',dataType:'json',
-		url:'api.php?m=upload&a=officeexists&id='+id+'&otype='+otype+'',
+		url:'api.php?m=upload&a=officeexists&id='+id+'&otype='+otype+'&erand='+erand+'',
 		success:function(ret){
 			if(ret.success){
 				var da = ret.data;

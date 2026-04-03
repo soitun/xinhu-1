@@ -110,5 +110,17 @@ class mode_flowelementClassAction extends inputAction{
 		}
 		return $farrs;
 	}
+	
+	public function modewhereAjax()
+	{
+		$modeid  = (int)$this->get('modeid','0');
+		
+		$rows 	 = m('flow_where')->getall("`setid`=".$modeid." AND ifnull(`num`,'')<>''", 'num,name','`sort` asc');
+		$farr	 = m('flow_element')->getall("`mid`=".$modeid." and `iszb`=0", 'fields,name','`sort` asc');
+		return array(
+			'wheredata'=>$rows,
+			'fieldsarr'=> $farr
+		);
+	}
 }	
 			

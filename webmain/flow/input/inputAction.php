@@ -96,7 +96,7 @@ class inputAction extends Action
 		}
 		if($oldrs)$this->rs = $oldrs;
 		$uaarr  = $farrs 	= array();
-		$lvls	= array('text','textarea','ditumap');
+		$lvls	= array('textnot','textarea','ditumap');
 		foreach($fieldsarr as $k=>$rs){
 			$fid = $rs['fields'];
 			$fi1 = substr($fid, 0, 5);
@@ -787,12 +787,20 @@ class inputAction extends Action
 		$actstr = $this->jm->base64decode($this->get('actstr'));
 		$acta 	= explode(',', $actstr);
 		$where  = arrvalue($acta, 2);
+		
+		//20250722
+		if(substr($actstr,0,5)=='rmod:'){
+			return c('input')->modestore($actstr);
+		}
+		
 		if(isempt($act)){
 			if($actstr){
 				$rows 	 = c('input')->sqlstore($actstr);
 			}
 			return $rows;
 		}
+
+		
 		//用:读取model上的数据
 		if(!isempt($act) && contain($act,':')){
 			$acta = explode(':', $act);
@@ -826,6 +834,15 @@ class inputAction extends Action
 							'value' => $rs[$vas],
 						);
 					}
+				}
+			}else{
+				$fopt = c('array')->strtoarray($actstr);
+				foreach($fopt as $k=>$rs){
+					$rows[] = array(
+						'name'	=> $rs[1],
+						'value' => $rs[0],
+						'color' => $rs[2]
+					);
 				}
 			}
 		}
@@ -884,6 +901,7 @@ class inputAction extends Action
 	{
 		$barr['rows'] 		= $rows;
 		$barr['atypearr'] 	= $this->atypearr;
+		if($this->atypearr && method_exists($this->flow, 'flowatypearr'))$barr['atypearr'] = $this->flow->flowatypearr($this->atypearr);
 		if($this->loadci==1){
 			$vobj	= m('view');
 			$barr['isadd'] 		= $vobj->isadd($this->modeid, $this->adminid); //判断是否可添加

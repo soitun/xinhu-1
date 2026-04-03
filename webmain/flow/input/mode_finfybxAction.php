@@ -50,5 +50,64 @@ class mode_finfybxClassAction extends inputAction{
 		
 		return array('rows'=>$rows);
 	}
+	
+	public function getzhangAjax()
+	{
+		return m('fina')->zhangtaoselect();
+	}
+	
+	
+	
+	
+	//生成账套20260122
+	public function createjizhangAjax()
+	{
+		$accountid 	= (int)$this->post('accountid','0');
+		$id 		= (int)$this->post('id','0');
+		$sm 		= $this->post('sm');
+		$mknum 		= $this->post('mknum');
+		$acrs 		= m('finount')->getone($accountid);
+		
+		
+		$rs 		= m('fininfom')->getone($id);
+		$urs 		= m('admin')->getone($rs['uid']);
+		$type 		= (int)$rs['type'];
+		$money 		= floatval($rs['money']);
+		
+		$typea 		= array('费用报销','出差报销','借款单','还款单');
+		$jtype		= $typea[$type];
+		
+		if($type<=2){
+			$money		= 0-$money;
+		}
+		
+		$paydt = $rs['paydt'];
+		if(isempt($paydt))$paydt = $this->date;
+		
+		$uarr['comid'] 	= $rs['comid'];
+		$uarr['type'] 	= 1;//0收入,1支出
+		$uarr['money'] 	= $money;
+		$uarr['mknum'] 	= $mknum.'|'.$id;
+		//$uarr['custid'] 	= $rs['custid'];
+		$uarr['custname'] = $rs['fullname'];
+		$uarr['applydt'] = $paydt;
+		$uarr['optid'] = $this->adminid;
+		$uarr['optname'] = $this->adminname;
+		$uarr['optdt'] 	= $this->rock->now;
+		$uarr['uid'] 	= $this->adminid;
+		$uarr['xguid'] 	= $rs['uid'];
+		$uarr['xgname'] 	= arrvalue($urs,'name');
+		$uarr['xgdeptid'] 	= arrvalue($urs,'deptid');
+		$uarr['xgdeptname'] = arrvalue($urs,'deptname');
+		$uarr['explain'] 	= $sm;
+		$uarr['accountid'] 	= $accountid;
+		$uarr['zhangid'] 	= $acrs['zhangid'];
+		$uarr['jtype'] 	= '差旅费';
+		
+		$newid = m('finjibook')->insert($uarr);
+		m('fininfom')->update('jzid='.$newid.'', $id);
+		
+		return returnsuccess();
+	}
 }	
 			

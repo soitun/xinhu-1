@@ -165,6 +165,7 @@ class sysfileClassAction extends Action
 		if($str=$this->iscaozuo())return $str;
 		$path = $this->jm->base64decode($this->get('path'));
 		if(isempt($path))return '无效文件';
+		$path  = str_replace('../','',$path);
 		$isdel = 0;
 		foreach($this->isdelmu as $sdif)if(strpos($path, $sdif)===0)$isdel=1;
 		if($isdel==0)return '此文件禁止删除';

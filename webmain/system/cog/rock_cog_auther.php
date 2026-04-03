@@ -98,6 +98,9 @@ $(document).ready(function(){
 	<div align="left" style="width:400px">
 	
 	<table cellspacing="0"  border="0" cellpadding="0">
+		<tr>
+			<td colspan="2" align="center"><div style="line-height:60px"><h1>签授是永久免费的</h1></div></td>
+		</tr>
 		
 		<tr>
 			<td colspan="2"><h4>系统签授(这个跟<font color=red>授权</font>没有任何关系)</h4></td>

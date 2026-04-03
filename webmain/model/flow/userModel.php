@@ -37,7 +37,7 @@ class flow_userClassModel extends flowModel
 			$where.= " and instr(`deptpath`,'[$detpid]')>0";
 		}
 		return array(
-			'fields'=> '`name`,`id`,`id` as uid,`face`,`sort`,`deptallname`,deptpath,`ranking`,`tel`,`mobile`,`email`,`user`,num,workdate,sex,deptname,deptnames,superman,status,type,online,lastonline,isvcard,`companyid`',
+			'fields'=> '`name`,`id`,`id` as uid,`face`,`sort`,`deptallname`,deptpath,`ranking`,`tel`,`mobile`,`email`,`user`,num,workdate,sex,deptname,deptnames,superman,status,type,online,lastonline,isvcard,`companyid`,`comid`',
 			'order' => '`status` desc,`sort`',
 			'where' => $where
 		);
@@ -124,6 +124,13 @@ class flow_userClassModel extends flowModel
 		if(isempt($quitdt))$uarr['quitdt'] = date('Y-m-d'); //设置离职日期
 		if($state != '5')$uarr['state']		= 5;//离职状态为5
 		if($uarr)$dbs->update($uarr, $id);
+	}
+	
+	//删除前判断
+	protected function flowdeletebillbefore()
+	{
+		$rs = m('flowbill')->getone('`uid`='.$this->id.' and `status`=0');
+		if($rs)return '此用户申请的['.$rs['modename'].']流程还未完成，不能删除，可以先停用';
 	}
 	
 	//导入数据的测试显示

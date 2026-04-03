@@ -7,6 +7,7 @@ class rockeditChajian extends Chajian{
 	
 	public $officebj_url = '';
 	private $officebj_urls = '';
+	private $agentkey = '';
 
 	protected function initChajian()
 	{
@@ -134,9 +135,9 @@ class rockeditChajian extends Chajian{
 	/**
 	*	获取推送配置
 	*/
-	public function getwsinfo()
+	public function getwsinfo($cans)
 	{
-		$barr 	= $this->getdata('file','wsinfo');
+		$barr 	= $this->getdata('file','wsinfo', $cans);
 		if(!$barr['success'])return '';
 		return $barr['data'];
 	}

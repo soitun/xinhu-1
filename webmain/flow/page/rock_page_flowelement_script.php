@@ -40,7 +40,10 @@ c.xuanmoxbo = function(){
 
 c.clickwin=function(o1,lx){
 	if(!this.xuanmoxbo())return;
-	openinput(modename,modenum,'0&mkid='+mkid+'','opegs{rand}');
+	var sort = 0,da=a.getData();
+	if(da)sort = da.length;
+	if(a.changedata && a.changedata.sort)sort = a.changedata.sort;
+	openinput(modename,modenum,'0&mkid='+mkid+'&def_sort='+sort+'','opegs{rand}');
 } 
 
 $('#tools'+modenum+'_{rand}').find('td[tdlx="sou"]').hide();

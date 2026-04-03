@@ -257,8 +257,8 @@ $(document).ready(function(){
 			
 			<td  align="right">文档在线编辑：</td>
 			<td class="tdinput">
-			<select id="officebj_{rand}"  class="form-control"><option value="">安装客户端在线编辑插件</option><option value="1">官网提供在线编辑服务(官网VIP专用)</option></select>
-			<div id="divofficebj_key" style="display:none"><input placeholder="在线编辑key，可不用设置" class="form-control" id="officebj_key_{rand}"></div>
+			<select id="officebj_{rand}"  class="form-control"><option value="">安装客户端在线编辑插件</option><option value="1">官网提供在线编辑服务(按次收费)</option></select>
+			<div id="divofficebj_key" style="display:none"><input placeholder="在线编辑key，可不用设置" class="form-control" id="officebj_key_{rand}"> <a target="_blank" href="<?=URLY?>view_onlineoffice.html">关于在线编辑说明</a></div>
 			</td>
 			
 		</tr>

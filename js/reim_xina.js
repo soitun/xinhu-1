@@ -5,7 +5,7 @@
 *	homepage:www.rockoa.com
 */
 
-var agentarr={},userarr={},grouparr={},cnum='',windowfocus=true,jietubool=false;
+var agentarr={},userarr={},grouparr={},cnum='',windowfocus=true,jietubool=false,fileinfoa={};
 
 var reim={
 	chatobj:{},
@@ -1487,6 +1487,7 @@ function chatcreate(cans){
 			this.showobj.perfectScrollbar();
 			if(this.sendinfo.uptypes)this.uptypes = this.sendinfo.uptypes;
 			if(this.sendinfo.uploadurl)this.upurl = this.sendinfo.uploadurl+'&laiyuan=web';
+			if(this.sendinfo.uploadinfo)fileinfoa[this.type] = this.sendinfo.uploadinfo;
 			this.showtitle();
 		}
 		this.loadci++;
@@ -1528,6 +1529,7 @@ function chatcreate(cans){
 				nfr1 = js.getoption('filesrc_'+frs.fileid+'');
 				if(nfr1)frs.thumbpath = nfr1;
 			}
+			if(frs)frs.type = this.type;
 			nr  = this.contshozt(frs);
 			if(nr=='')nr= jm.base64decode(d.cont);
 			rnd = 'mess_'+sid+'';
@@ -1731,7 +1733,7 @@ function chatcreate(cans){
 		js.msg('none');
 		var o	= this.inputobj;
 		var nr	= strformat.sendinstr(o.val());
-		nr		= nr.replace(/</gi,'&lt;').replace(/>/gi,'&gt;').replace(/\n/gi,'<br>');
+		nr		= nr.replace(/</gi,'&lt;').replace(/>/gi,'&gt;').replace(/\n/gi,'<br>').replace(/ /gi,'&nbsp;');
 		if(ssnr)nr=ssnr;
 		if(isempt(nr))return false;
 		if(nr.indexOf('@')<0)this.atid=0;
@@ -1935,8 +1937,8 @@ function chatcreate(cans){
 			return;
 		}
 		var tm= this.upfilearr,conss='';
-		if(this.type=='gout')a.fileid = a.filenum;
-		f = a;
+		if(this.type=='gout' || this.type=='zixun')a.fileid = a.filenum;
+		f = a;a.type = this.type;
 		strformat.upsuccess(a);
 		if(js.isimg(f.fileext)){
 			conss = '[图片 '+f.filesizecn+']';
@@ -2188,6 +2190,7 @@ function chatcreate(cans){
 			}
 			if(d1.filename){
 				if(d1.filenum)d1.fileid = d1.filenum;
+				d1.type = this.type;
 				s1=strformat.contshozt(d1);
 			}
 			s+='<div class="lists" onclick="'+this.objstr+'.clickstar('+i+',this,event)" style="border-bottom-width:1px">';
@@ -2360,9 +2363,9 @@ strformat.openurl=function(dz){
 	}
 }
 
-strformat.clickfile=function(fid,lx){
+strformat.clickfile=function(fid,lx, type){
 	if(isNaN(fid)){
-		reim.outgroup.fileopt(fid,lx);
+		reim.outgroup.fileopt(fid,lx,type);
 	}else{
 		js.fileopt(fid,lx);
 	}
@@ -2497,9 +2500,11 @@ reim.outgroup={
 			}
 		}
 	},
-	fileopt:function(id1,lx){
+	fileopt:function(id1,lx, type){
 		js.loading('加载中...');
-		reim.ajax(this.geturl('fileinfo'),{lx:lx,id:id1},function(ret){
+		var surl = this.geturl('fileinfo');
+		if(fileinfoa[type])surl = fileinfoa[type];
+		reim.ajax(surl,{lx:lx,id:id1},function(ret){
 			var da = ret.data,url = da.url;
 			js.unloading();
 			if(da.lx==1){

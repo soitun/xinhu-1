@@ -32,8 +32,13 @@ class uploadClassAction extends apiAction
 		$this->returnjson($arr);
 	}
 	
+	/**
+	*	从编辑文件中心获取最新编辑的文件20250610
+	*/
 	public function editfilebAction()
 	{
+		//用那个异步去获取(待开发)
+		
 		$fileid = (int)$this->get('fileid','0');
 		$frs 	= m('file')->getone($fileid);
 		if(!$frs)return 'error';
@@ -56,6 +61,22 @@ class uploadClassAction extends apiAction
 		}else{
 			return '编辑失败;';
 		}
+	}
+	
+	//判断是否编辑完成
+	public function editfilecAction()
+	{
+		$fileid = (int)$this->get('fileid','0');
+		$erand	= $this->get('erand');
+		$frs 	= m('file')->getone($fileid);
+		if(!$erand || !$frs)return 'error';
+		$barr   = c('rockedit')->getdata('file','editfilec', array(
+			'filekey' 	=> getconfig('xinhukey'),
+			'filenum' 	=> $frs['onlynum'],
+			'erand'		=> $erand
+		));
+		if($barr['success'])return $barr['data'];
+		return 'wait';
 	}
 	
 	
@@ -378,9 +399,20 @@ class uploadClassAction extends apiAction
 			//编辑
 			if($type==2){
 				if(getconfig('officebj')=='1'){
+					$erand			= rand(1000000,9999999);
 					$data['fileext']= 'rockedit';
-					$data['url'] 	= 'index.php?m=public&a=fileedit&id='.$fileid.'';
-					$data['editwsinfo'] = c('rockedit')->getwsinfo();
+					$data['url'] 	= 'index.php?m=public&a=fileedit&id='.$fileid.'&erand='.$erand.'';
+					$data['editwsinfo'] = c('rockedit')->getwsinfo(array(
+						'erand' => $erand,
+						'fileid'=> $fileid
+					));
+					/*
+					c('rockqueue')->push('rockoffice,gedit', array(
+						'erand'  => $erand,
+						'cishu'	 =>1, 
+						'fileid' =>$fileid,
+						'optid'	=> $this->adminid
+					), time() + 10);*/
 				}else{
 					if($ismobile==1)return returnerror('移动端不支持在线编辑');
 					$data['fileext']='rockoffice';
@@ -668,6 +700,7 @@ class uploadClassAction extends apiAction
 			'optid'		=> $this->adminid,
 			'otype'		=> $otype,
 			'fileext'	=> $frs['fileext'],
+			'erand'		=> $this->get('erand'),
 			'filename'	=> $this->rock->jm->base64encode($frs['filename']),
 			'optname'	=> $this->rock->jm->base64encode($this->adminname),
 			'face'		=> $this->rock->jm->base64encode(m('admin')->getface($urs['face'])),

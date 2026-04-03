@@ -138,7 +138,7 @@ class inputChajian extends Chajian
 		}
 		if($type=='textarea'){
 			$iszhang= false;
-			$str = '<textarea class="textarea" onblur="js.changdu(this)" style="height:80px;'.$style.'" '.$attr.''.$lenstr.' name="'.$fname.'">'.$val.'</textarea>';
+			$str = '<textarea class="textarea" onkeyup="return js.chajian(\'rocktextarea\',{obj:this,evt:event,len:\''.$lens.'\'})" onblur="js.changdu(this)" style="height:80px;'.$style.'" '.$attr.''.$lenstr.' name="'.$fname.'">'.$val.'</textarea>';
 		}
 		if($type=='rockcombo' || $type=='select' || $type=='checkboxall' || $type=='radio'){
 			$attr.=' onchange="c.inputblur(this, '.$iszb.')"';
@@ -240,6 +240,13 @@ class inputChajian extends Chajian
 			$str.= '<div id="graphview_'.$fname.'" class="btn-group">';
 			$str.= '<button type="button" onclick="c.autograph(\''.$fname.'\',0)" class="webbtn">手写</button><button type="button" onclick="c.autograph(\''.$fname.'\',1)" class="webbtn">引入</button><button onclick="c.autograph(\''.$fname.'\',2)" class="webbtn" type="button">x</button></div>';
 		}
+		if($type=='relevant'){
+			$str = '<div><div id="relevantview_'.$fname.'" class="list-items-group" style="height:auto;min-height:60px;border:var(--border); background:white;background:var(--main-bgcolor);border-radius:5px;overflow:auto"></div><input name="'.$fname.'" value="'.$val.'" type="hidden">';
+			$str.='<div><a href="javascript:;" onclick="c.relevant(\''.$fname.'\',\''.$data.'\')" onclick="c.upload()">＋选择单据</a>';
+			if(!isempt($placeholder))$str.='<span class="tishi">'.$placeholder.'</span>';
+			$str.='</div>';
+			$str.='</div>';
+		}
 		if($type=='auto'){
 			$datanum = $data;
 			if(!isempt($datanum)){
@@ -323,6 +330,11 @@ class inputChajian extends Chajian
 					'value' => $val,
 				);
 			}
+		}
+		
+		//20250722从模块中读取做数据源
+		if(substr($datanum,0,5)=='rmod:'){
+			return $this->modestore($datanum);
 		}
 		
 		//2021-02-26新增新的数据源,开头
@@ -432,6 +444,29 @@ class inputChajian extends Chajian
 				$rs1['value'] = $rs1[$vdf];
 				$rows[] = $rs1;
 			}
+		}
+		return $rows;
+	}
+	
+	/**
+	*	模块数据 20250722添加
+	*/
+	public function modestore($act)
+	{
+		$rows = array();
+		if(!$act)return $rows;
+		$acta = explode(',',substr($act,5));
+		$cana = explode('|',$acta[0]);
+		$flow = m('flow')->initflow($cana[0]);
+		$rowd = $flow->getflowrows($this->adminid, $cana[1], -1);
+		if($rowd)foreach($rowd as $k=>$rs){
+			$sname = '';
+			if(isset($cana[4]))$sname = $this->rock->reparr($cana[4], $rs);
+			$rows[] = array(
+				'value' => $rs[$cana[3]],
+				'name'	=> $this->rock->reparr($cana[2], $rs),
+				'subname' => $sname
+			);
 		}
 		return $rows;
 	}

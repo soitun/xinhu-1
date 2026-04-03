@@ -81,15 +81,15 @@ $(document).ready(function(){
 			guanflowmenulist = a;
 			addtabs({num:'flowmenu'+id+'',url:'main,flow,menuedit,id='+id+',setid='+modeid+',',icons:icon,name:name});
 		},
-		changemode:function(){
-			modeid=this.value;
+		changemode:function(sid){
+			modeid=sid;
 			a.setparams({mid:modeid},true);
 			var bo = (modeid==0);
 			get('add_{rand}').disabled = bo;
 		}
 	};
 	js.initbtn(c);
-	$('#mode_{rand}').change(c.changemode);
+	$('#mode_{rand}').change(function(){c.changemode(this.value)});
 });
 </script>
 

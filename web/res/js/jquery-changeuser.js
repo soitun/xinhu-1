@@ -458,6 +458,7 @@
 		this.ismobile = false;
 		this.page 	  = 1;
 		this.selvalue = '';
+		this.width 	  = 350;
 		
 		this._init	= function(){
 			for(var i in options)this[i]=options[i];
@@ -465,7 +466,7 @@
 			this._showcreate();
 		};
 		this._showcreate = function(){
-			var ws = '350px';
+			var ws = ''+this.width+'px';
 			if(this.ismobile)ws='90%';
 			var cold = window['maincolor'];if(!cold)cold='#1389D3';
 			var s='<div style="width:100%;height:100%;overflow:hidden;left:0px;top:0px; background:rgba(0,0,0,0.3);position:fixed;z-index:11" id="selectdata_'+rand+'">';

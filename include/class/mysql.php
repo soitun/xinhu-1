@@ -281,6 +281,7 @@ abstract class mysql{
 	
 	public function getall($sql, $call=null, $cans=array())
 	{
+		if(is_array($sql))$sql = $this->getsql($sql);
 		$res=$this->query($sql);
 		$arr=array();
 		if($res){

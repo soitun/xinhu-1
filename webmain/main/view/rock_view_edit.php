@@ -122,7 +122,7 @@ $(document).ready(function(){
 		
 		<tr>
 			<td  align="right" width="15%" ><font color=red>*</font> 类型：</td>
-			<td class="tdinput" width="35%" ><select name="type" class="form-control"><option value="0">查看(只针对详情页)</option><option value="1">添加</option><option value="2">编辑</option><option value="3">删除</option><option value="4">导入</option><option value="5">导出</option><option value="6">禁看字段(条件满足时针对对象就不能查看相应的字段)</option><option value="7">流程监控(条件满足时针对对象就可监控流程)</option></select></td>
+			<td class="tdinput" width="35%" ><select name="type" class="form-control"><option value="0">查看(只针对详情页)</option><option value="1">添加</option><option value="2">编辑</option><option value="3">删除</option><option value="4">导入</option><option value="5">导出</option><option value="6">禁看字段(条件满足时针对对象就不能查看相应的字段)</option><option value="7">流程监控(条件满足时针对对象就可监控流程)</option><option value="8">禁看处理记录(条件满足时无法查看详情页的处理记录)</option><option value="9">禁看查阅记录(条件满足时无法查看详情页的查阅记录和未查阅记录)</option></select></td>
 			<td  align="right"  width="15%"></td>
 			<td class="tdinput" width="35%" ></td>
 		</tr>

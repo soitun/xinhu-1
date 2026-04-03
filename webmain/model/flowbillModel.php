@@ -136,6 +136,7 @@ class flowbillClassModel extends Model
 			$modename	= $rs['modename'];
 			$summary	= '';
 			$summarx 	= '';
+			$comidname 	= '';
 			$modenum 	= '';
 			$statustext	= '记录不存在';
 			$statusstr	= '不存在';
@@ -155,7 +156,8 @@ class flowbillClassModel extends Model
 				$rers 		= $this->db->getone('[Q]'.$rs['table'].'', $rs['mid']);
 				if($rers){
 					$tihsrs  = $flow->rsreplace($rers, 2, null, 1);
-					$summary = $this->rock->reparr($mors['summary'], $tihsrs);
+					$comidname = arrvalue($tihsrs,'comidname');
+					$summary   = $this->rock->reparr($mors['summary'], $tihsrs);
 					$summarx = $this->rock->reparr($mors['summarx'], $tihsrs);
 	
 					$ztarr 	 = $flow->getstatus($rers, $mors['statusstr'], $rs['nowcheckname']);
@@ -190,6 +192,7 @@ class flowbillClassModel extends Model
 					if(!isempt($rs['checksm']))$cont.='<br>处理说明：'.$rs['checksm'].'';
 				}
 			}
+			if(ISMORECOM)$cont.='<br>所属单位※：'.$comidname.'';
 			
 			$srows[]= array(
 				'title' => $title,
@@ -298,6 +301,7 @@ class flowbillClassModel extends Model
 			$modename	= $rs['modename'];
 			$summary	= '';
 			$modenum 	= '';
+			$comidname	= '';
 			$statustext	= '记录不存在';
 			$statuscolor= '#888888';
 			$ishui 		= 0;
@@ -319,6 +323,7 @@ class flowbillClassModel extends Model
 					$tihsrs  = $flow->rsreplace($rers, 2, null, 1);
 					$summary = $this->rock->reparr($mors['summary'], $tihsrs);
 					
+					$comidname	 = arrvalue($tihsrs,'comidname');//所属单位
 					$nowsets	 = $rs['nowcheckname']; //当前审核人
 					$ztarr 		 = $flow->getstatus($rers, $mors['statusstr'], $nowsets);
 					$statustext  = $ztarr[0];
@@ -349,6 +354,7 @@ class flowbillClassModel extends Model
 				'modename' 	=> $modename,
 				'modenum' 	=> $modenum,
 				'summary' 	=> $summary,
+				'comidname' => $comidname,
 				'status'	=> $statusstr
 			);
 		}

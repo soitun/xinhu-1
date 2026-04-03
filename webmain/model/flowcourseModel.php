@@ -113,7 +113,7 @@ class flowcourseClassModel extends Model
 	//获取显示数据
 	public function getTreedata($setid)
 	{
-		$drows = $this->db->getall("select *,(select count(1) from `[Q]flow_course` where `mid`=a.id)as stotal from `[Q]flow_course` a where a.`setid`='$setid' order by a.`sort`");
+		$drows = $this->db->getall("select *,(select count(1) from `[Q]flow_course` where `setid`=".$setid." and `mid`=a.id)as stotal from `[Q]flow_course` a where a.`setid`='$setid' order by a.`sort`");
 		$this->getTreedatada = array();
 		$this->getTreedatada[] = array(
 			'name'  	=> '提交',

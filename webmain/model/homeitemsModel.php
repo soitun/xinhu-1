@@ -56,18 +56,28 @@ class homeitemsClassModel extends Model
 			}
 		}
 		
+		//读取权限下的菜单id
+		$myext  	= $this->rock->session('adminallmenuid');
+		$mewhere	= '';
+		if($myext != '-1'){
+			$mewhere = '`id` in('.str_replace(array('[',']'), array('',''), $myext).') and ';
+		}
+		if($this->adminid!=1)$mewhere.='`type`=0 and ';
+		
+		
 		$nubar = array();
-		$nuarr = m('menu')->getall('`status`=1 and num is not null');
+		$nuarr = m('menu')->getall(''.$mewhere.'`status`=1 and num is not null');
 		foreach($nuarr as $k=>$rs)$nubar[] = $rs['num'];
 		
-		if(!isset($arr['daiban']))$arr['daiban']		= $bidb->daibanshu($uid);
-		if(!isset($arr['applywtg']))$arr['applywtg']	= $bidb->applymywgt($uid);
-		if(!isset($arr['daiturn']))$arr['daiturn'] 		= $bidb->daiturntotal($uid);
-		if(!isset($arr['danerror']))$arr['danerror']	= $bidb->errortotal();
+		if(in_array('daiban', $nubar) && !isset($arr['daiban']))$arr['daiban']			= $bidb->daibanshu($uid);
+		if(in_array('applywtg', $nubar) && !isset($arr['applywtg']))$arr['applywtg']	= $bidb->applymywgt($uid);
+		if(in_array('daiturn', $nubar) && !isset($arr['daiturn']))$arr['daiturn'] 		= $bidb->daiturntotal($uid);
+		if(in_array('danerror', $nubar) && !isset($arr['danerror']))$arr['danerror']	= $bidb->errortotal();
+		
 		if(in_array('workwwc', $nubar) && !isset($arr['workwwc']))$arr['workwwc']		= m('work')->getwwctotals($uid);
-		if(in_array('email', $nubar) && !isset($arr['email']))$arr['email']			= m('emailm')->wdtotal($uid);
+		if(in_array('email', $nubar) && !isset($arr['email']))$arr['email']				= m('emailm')->wdtotal($uid);
 		if(in_array('flowtodo', $nubar) && !isset($arr['flowtodo']))$arr['flowtodo']	= m('flowtodo')->getwdtotals($uid);
-		if(in_array('cropt', $nubar) && !isset($arr['cropt']))$arr['cropt']			= m('goods')->getdaishu(); //出入库操作数
+		if(in_array('cropt', $nubar) && !isset($arr['cropt']))$arr['cropt']				= m('goods')->getdaishu(); //出入库操作数
 		if(in_array('receiptmy', $nubar) && !isset($arr['receiptmy']))$arr['receiptmy']	= m('flow:receipt')->getweitotal($uid);
 		if(in_array('myhong', $nubar) && !isset($arr['myhong']) && $this->iscun('officiahong'))$arr['myhong'] 		= m('official')->rows('`uid`='.$uid.' and `type`=0 and `status`=1 and `thid`=0');//统计未套红的
 		if(in_array('officidus', $nubar) && !isset($arr['officidus']) && $this->iscun('officidu'))$arr['officidus'] = m('officidu')->rows('`status` in(0,3) and `isturn`=1 and '.$this->rock->dbinstr('runrenid',$uid).'');
@@ -83,7 +93,16 @@ class homeitemsClassModel extends Model
 			if(in_array('daifina', $nubar))$arr['daifina'] = $dbss->rows('`ispay`=1 and `jzid`=0 and `type`=0');
 			if(in_array('daifinb', $nubar))$arr['daifinb'] = $dbss->rows('`ispay`=1 and `jzid`=0 and `type`=1');
 		}
-
+		
+		if(in_array('allfybx', $nubar))$arr['allfybx'] 	= m('fininfom')->rows('`type`=0 and `status`=1 and `jzid`=0');
+		if(in_array('allccbx', $nubar))$arr['allccbx'] 	= m('fininfom')->rows('`type`=1 and `status`=1 and `jzid`=0');
+		
+		//物业的
+		if($this->iscun('wyfee')){
+			if(in_array('wyfee', $nubar))$arr['wyfee'] 		= m('wyfee')->rows('`ispay`=2');
+		}
+		
+		foreach($arr as $k=>$v)if($v==0)unset($arr[$k]);
 		return $arr;
 	}
 	

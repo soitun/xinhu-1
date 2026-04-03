@@ -405,6 +405,7 @@ appbacklocation=function(res){
 	js.dw.dwsuccess({
 		latitude:latitude,
 		longitude:longitude,
-		accuracy:accuracy
+		accuracy:accuracy,
+		address:res.address
 	});
 }

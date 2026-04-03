@@ -241,7 +241,6 @@ class downChajian extends Chajian{
 		$s2			= $s.'';
 		$lvlaraa  	= explode(',',' ,user(),found_rows,(),\',",select*from,select*,%20,<,>,\,');
 		$s = str_replace($lvlaraa, '', $s);
-		$s = str_replace(array('(',')'), array('）','）'), $s);
 		if($s!=$s2)$str = $s;
 		return $str;
 	}

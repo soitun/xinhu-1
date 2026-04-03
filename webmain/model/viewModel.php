@@ -91,13 +91,27 @@ class viewClassModel extends Model
 		return $this->getsswhere(3,$ufid);
 	}
 	
+	//返回禁看处理记录sql条件
+	public function jkcljlwhere($mid, $uid=0, $ufid='')
+	{
+		$this->getursss($mid, $uid);
+		return $this->getsswhere(8,$ufid);
+	}
+	
+	//返回禁看查阅记录sql条件
+	public function jkcyjlwhere($mid, $uid=0, $ufid='')
+	{
+		$this->getursss($mid, $uid);
+		return $this->getsswhere(9,$ufid);
+	}
+	
 	//$type类型0查看,1新增 $ufid 用户ID $glx0返回类型
 	private function getsswhere($type, $ufid='', $glx=0)
 	{
 		$mid	= $this->modeid;
 		$where 	= $this->addb->getjoinstr('receid', $this->urs);
 		if($ufid=='')$ufid = 'uid';
-		$uid	= $this->urs['id'];
+		$uid	= arrvalue($this->urs, 'id','0');;
 		$companyid	= arrvalue($this->urs, 'companyid','0');
 		$rows 	= $this->getall('`modeid`='.$mid.' and `type`='.$type.' and `status`=1 '.$where.'','wherestr,whereid,fieldstr');
 		$wehs	= array();

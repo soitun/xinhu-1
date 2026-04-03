@@ -26,6 +26,8 @@ class apiAction extends ActionNot
 	public $cfrom		= '';
 	public $token		= '';
 	
+	public function initApiCheck(){return false;}
+	
 	public function initAction()
 	{
 		$this->display= false;
@@ -35,7 +37,10 @@ class apiAction extends ActionNot
 		$nadminid 		 = $this->adminid;
 		$this->adminid 	 = (int)$this->request('adminid', $nadminid);
 		$this->adminname = '';
-		$boss = (M == 'login|api');
+		$boss = (M == 'login|api'); //true就是不需要验证登录
+		$bossv= $this->initApiCheck();
+		if($bossv)$boss = true;
+
 		if(!$boss){
 			if(isempt($this->token))$this->showreturn('','token invalid', 199);
 			$lodb = m('login');
@@ -43,10 +48,14 @@ class apiAction extends ActionNot
 			if(!$onto)$this->showreturn('','登录失效，请重新登录', 199);
 			$lodb->update("`moddt`='{$this->rock->now}'", $onto['id']);
 		}
-		$this->userrs = m('admin')->getone("`id`='$this->adminid' and `status`=1", '`name`,`user`,`id`,`ranking`,`deptname`,`deptid`');
-		if(!$this->userrs && !$boss){
-			$this->showreturn('', '用户已经不存在了，请重新登录', 199);
+		
+		if(!$boss){
+			$this->userrs = m('admin')->getone("`id`='$this->adminid' and `status`=1", '`name`,`user`,`id`,`ranking`,`deptname`,`deptid`');
+			if(!$this->userrs){
+				$this->showreturn('', '用户已经不存在了，请重新登录', 199);
+			}
 		}
+		
 		$this->adminname 		= arrvalue($this->userrs, 'name');
 		$this->rock->adminid	= $this->adminid;
 		$this->rock->adminname 	= $this->adminname;

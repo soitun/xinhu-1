@@ -481,5 +481,12 @@ var inputtwo={
 			},
 			nameobj:o1
 		});
+	},
+	
+	//2026-03-02
+	relevant:function(na,s1){
+		if(isedit==0)return;
+		var cans = {'fname':na,'datastr':s1,'sysmodenum':modenum,'sysmid':mid,'ctype':'change'};
+		js.chajian('rockrelevant', cans);
 	}
 }

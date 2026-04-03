@@ -53,7 +53,7 @@ body,html{background-color:#f1f1f1;overflow:hidden}
 <script>
 var json = <?=json_encode($arr)?>;
 ismobile = 1,openfrom='<?=$openfrom?>';
-var agentlx=0,xhauthkey = '<?=$xhauthkey?>',maincolor='<?=$maincolor?>';
+var agentlx=0,openlx='<?=arrvalue($da,'openlx')?>',xhauthkey = '<?=$xhauthkey?>',maincolor='<?=$maincolor?>';
 function yingyonginit(){
 	yy.loadshow();
 }

@@ -225,12 +225,13 @@ function optmenuclass(o1,num,id,obj,mname,oi, cola){
 			if(isempt(upg)){
 				js.msg('msg','没有设置自定义方法');
 			}else{
-				var dxs = this.optobj[upg];
-				if(!dxs)dxs = window[upg];
+				var dxs = this.optobj[upg],sja = this.tableobj.getData(this.oi);
+				if(!dxs)dxs = window[upg];if(!dxs)dxs = $[upg];
 				if(!dxs){
-					js.msg('msg','设置的方法“'+upg+'”不存在');
+					setTimeout(function(){if(!$[upg])js.msg('msg','定义方法“'+upg+'”不存在');},1000);
+					js.importjs('webmain/flow/input/inputjs/modejs_'+upg+'.js?'+js.getrand()+'', function(){$[upg](sja,d, obj,0);});
 				}else{
-					dxs(this.tableobj.getData(this.oi),d);
+					dxs(sja,d, this.tableobj);
 				}
 			}
 			return;

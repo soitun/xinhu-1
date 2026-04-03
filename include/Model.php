@@ -179,11 +179,15 @@ abstract class Model{
 		return $this->rows($where);
 	}
 	
-	public function getXinxi($id,$fields='*')
+	public function getXinxi($id,$fields='*', $kfid='')
 	{
-		if(isset($this->tempxinxi[$id]))return $this->tempxinxi[$id];
-		$rs = $this->getone($id,$fields);
-		$this->tempxinxi[$id] = $rs;
+		if(isset($this->tempxinxi[$id])){
+			$rs = $this->tempxinxi[$id];
+		}else{
+			$rs = $this->getone($id,$fields);
+			$this->tempxinxi[$id] = $rs;
+		}
+		if($kfid)return arrvalue($rs, $kfid);
 		return $rs;
 	}
 }

@@ -225,4 +225,64 @@ class flowoptClassAction extends Action
 		$dbs->update($sarr, $where);
 		return returnsuccess();
 	}
+	
+	/**
+	*	相关单据的数据源
+	*/
+	public function relevantdataAction()
+	{
+		$num 		= $this->get('num');
+		$xxu 		= (int)$this->get('selvalue','0');
+		$page 		= (int)$this->get('page','1');
+		$limit 		= (int)$this->get('limit');
+		$datastr 	= $this->get('datastr');
+		$key 		= $this->get('key');
+		if(isempt($datastr))return '没设置数据源';
+		$datsa 		= explode(',', $this->jm->base64decode($datastr));
+		$dats 		= array();
+		if($datsa)foreach($datsa as $dv){
+			$datv 	= explode('|', $dv);
+			$dats[] = array($datv[0], arrvalue($datv,1), arrvalue($datv,2));
+		}
+		$rows 		= array();
+		$rowsc 		= array();
+		$fdb 		= m('flow_set');
+		$atype 		= '';
+		if($dats)foreach($dats as $dav){
+			$val = $dav[0];
+			$rs  = $fdb->getone("`num`='$val' and `status`=1");
+			if($rs){
+				$rowsc[] = array('name' => ''.$rs['name'].'('.$val.')','value'=>count($rowsc),'num'=>$val,'atype'=>$dav[1]);	
+			}
+		}
+		if(!$rowsc)return '设置数据源不存在';
+		
+		$dta   = $rowsc[$xxu];
+		$xnum  = $dta['num'];
+		$atype = $dta['atype'];
+		if(!$atype)$atype = 'my';
+		if($key)$_POST['key']= $this->jm->base64decode($key);
+		
+		$flow 		= m('flow')->initflow($xnum);
+		$totalCount = $flow->getflowrows($this->adminid, $atype, 0); //总数
+		$rowd 		= $flow->getflowrows($this->adminid, $atype, ''.(($page-1)*$limit).','.$limit.'');
+		
+		$summary 	= $flow->moders['summary'];
+		if($rowd)foreach($rowd as $k=>$rs){
+			$rows[] = array(
+				'value' => ''.$xnum.'|'.$rs['id'].'',
+				'name'	=> $this->rock->reparr($summary, $rs),
+				'subname' => arrvalue($rs,'optdt')
+			);
+		}
+		
+		
+		return array(
+			'rows' 		 => $rows,
+			'selectdata' => $rowsc,
+			'totalCount' => $totalCount,
+			'page'		 => $page,
+			'limit'		 => $limit,
+		);
+	}
 }

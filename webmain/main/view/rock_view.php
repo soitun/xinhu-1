@@ -11,7 +11,7 @@ $(document).ready(function(){
 			text:'模块',dataIndex:'modename',sortable:true
 		},{
 			text:'类型',dataIndex:'type',sortable:true,renderer:function(oi){
-				var as=['可查看','可添加','可编辑','可删除','可导入','可导出','禁看字段','流程监控'];
+				var as=['可查看','可添加','可编辑','可删除','可导入','可导出','禁看字段','流程监控','禁看处理记录','禁看查阅记录'];
 				return ''+as[oi]+'';
 			}
 		},{

@@ -135,4 +135,22 @@ class finaClassModel extends Model
 			}
 		}
 	}
+	
+	/**
+	* 账套下拉框用的2026-01-22
+	*/
+	public function zhangtaoselect()
+	{
+		$zhangarr = $this->getzhangtao();
+		$zhangarrs= array();
+		foreach($zhangarr as $k=>$rs){
+			$zhangarrs[] = array('optgroup'=>'start','name'=>$rs['name']);
+			$arows = $this->getaccount($rs['value']);
+			if($arows)foreach($arows as $k1=>$rs1){
+				$zhangarrs[] = $rs1;
+			}
+			$zhangarrs[] = array('optgroup'=>'end','name'=>$rs['name']);
+		}
+		return $zhangarrs;
+	}
 }

@@ -274,7 +274,7 @@ class loginClassModel extends Model
 	
 	//移除表情符合2021-04-13添加，这个方法不太兼容
 	private function removeEmojiChar($str){
-		//return $str; //如有问题去掉注释
+		if(!function_exists('mb_strlen'))return $str;
 		$mbLen  = mb_strlen($str);
 		$strArr = array();
 		for ($i = 0; $i < $mbLen; $i++) {

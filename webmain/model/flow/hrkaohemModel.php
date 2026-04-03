@@ -40,6 +40,10 @@ class flow_hrkaohemClassModel extends flowModel
 			foreach($zbdata as $k1=>$rs1)$str.=''.$rs1['pfname'].'('.$rs1['pfweight'].'%);';
 			$rs['temp_pfren'] = $str;
 		}
+		if($rs['enddt']<$this->rock->date){
+			$rs['ishui']=1;
+			$rs['enddt'].='(已截止)';
+		}
 		return $rs;
 	}
 

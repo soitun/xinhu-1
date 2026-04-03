@@ -193,7 +193,7 @@ var strformat = {
 		}
 		if(snr){
 			nr+= '<div><img src="'+snr+'" onclick="strformat.clickimg(this)" id="jietuimg_'+nuid+'" width="150"></div>';
-			nr+= '<div><a onclick="im.upbase64(\''+nuid+'\')" href="javascript:;">[发送截图]</a>';
+			nr+= '<div><a onclick="im.upbase64(\''+nuid+'\');$(this).remove();" href="javascript:;">[发送截图]</a>';
 		}
 		nr+= '<div class="progresscls"><div id="progresscls_'+nuid+'" class="progressclssse"></div><div class="progressclstext"  id="progresstext_'+nuid+'">0%</div></div>';
 		nr+= '<div id="progcanter_'+nuid+'"><a href="javascript:;" onclick="strformat.cancelup(\''+nuid+'\')">取消</a></div>';
@@ -256,6 +256,7 @@ var strformat = {
 		var s='',slx,sttr;
 		if(!d)return s;
 		if(!d.fileid)d.fileid=d.id;
+		var type = d.type;if(!type)type='';//会话类型
 		if(js.isimg(d.fileext)){
 			sttr='';
 			if(d.thumbpath){
@@ -275,7 +276,7 @@ var strformat = {
 		}else{
 			slx = d.fileext;if(!lj)lj='';
 			if(js.fileall.indexOf(','+slx+',')<0)slx='wz';
-			s='<table><tr><td><div class="qipaofile">'+d.fileext.toUpperCase()+'</div></td><td>'+d.filename+'<br><span style="font-size:12px;color:#888888">('+d.filesizecn+')&nbsp;&nbsp;<a href="javascript:;" onclick="strformat.clickfile(\''+d.fileid+'\',1)">下载</a>&nbsp;&nbsp;<a href="javascript:;" onclick="strformat.clickfile(\''+d.fileid+'\',0)">预览</a></span></td></tr></table>';
+			s='<table><tr><td><div class="qipaofile">'+d.fileext.toUpperCase()+'</div></td><td>'+d.filename+'<br><span style="font-size:12px;color:#888888">('+d.filesizecn+')&nbsp;&nbsp;<a href="javascript:;" onclick="strformat.clickfile(\''+d.fileid+'\',1,\''+type+'\')">下载</a>&nbsp;&nbsp;<a href="javascript:;" onclick="strformat.clickfile(\''+d.fileid+'\',0,\''+type+'\')">预览</a></span></td></tr></table>';
 		}
 		return s;
 	},

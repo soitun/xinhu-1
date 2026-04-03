@@ -48,7 +48,7 @@
 		}
 		
 		this.loaddata = function(key){
-			if(!key)key='';
+			if(!key)key='';if(!this.url)return;
 			$.ajax({
 				type:'get',data:{key:jm.base64encode(key)},
 				url:this.url,dataType:'json',

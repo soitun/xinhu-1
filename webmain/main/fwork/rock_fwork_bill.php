@@ -6,31 +6,34 @@ $(document).ready(function(){
 	if(!zt)zt='';
 	if(!mid)mid='0';
 	var bools=false;
+	
+	var columns = [{
+		text:'模块',dataIndex:'modename'
+	},{
+		text:'部门',dataIndex:'deptname'
+	},{
+		text:'申请人',dataIndex:'name'
+	},{
+		text:'流程单号',dataIndex:'sericnum'
+	},{
+		text:'申请日期',dataIndex:'applydt',sortable:true
+	},{
+		text:'摘要',dataIndex:'summary',align:'left',renderer:function(v){
+			return '<div style="min-width:400px">'+v+'</div>';
+		}
+	},{
+		text:'操作人',dataIndex:'optname',sortable:true
+	}];
+	
+	if(companymode)columns.push({text:'所属单位※',dataIndex:'comidname'});
+	columns.push({text:'流程状态',dataIndex:'status',sortable:true});
+	columns.push({text:'',dataIndex:'caozuo',callback:'opegs{rand}'});
+	
 	var a = $('#view_{rand}').bootstable({
 		tablename:'flow_bill',params:{'atype':atype,'zt':zt,'modeid':mid},fanye:true,
 		url:publicstore('{mode}','{dir}'),checked:atype=='daib',
 		storeafteraction:'flowbillafter',storebeforeaction:'flowbillbefore',
-		columns:[{
-			text:'模块',dataIndex:'modename'
-		},{
-			text:'部门',dataIndex:'deptname'
-		},{
-			text:'申请人',dataIndex:'name'
-		},{
-			text:'单号',dataIndex:'sericnum'
-		},{
-			text:'申请日期',dataIndex:'applydt',sortable:true
-		},{
-			text:'摘要',dataIndex:'summary',align:'left',renderer:function(v){
-				return '<div style="min-width:400px">'+v+'</div>';
-			}
-		},{
-			text:'操作人',dataIndex:'optname',sortable:true
-		},{
-			text:'状态',dataIndex:'status',sortable:true
-		},{
-			text:'',dataIndex:'caozuo',callback:'opegs{rand}'
-		}],
+		columns:columns,
 		celldblclick:function(){
 			c.view();
 		},
@@ -185,7 +188,7 @@ $(document).ready(function(){
 	
 
 	<td  style="padding-left:10px">
-		<input class="form-control" style="width:130px" id="key_{rand}"  placeholder="单号/处理人/姓名/部门">
+		<input class="form-control" style="width:130px" id="key_{rand}"  placeholder="流程单号/处理人/姓名/部门">
 	</td>
 	
 	<td  style="padding-left:10px">

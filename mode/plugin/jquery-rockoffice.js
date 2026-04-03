@@ -1,11 +1,13 @@
 /**
-*	在线编辑获取内容的
+*	在线编辑获取内容的20250606
 */
 
 js.plugin_rockoffice = function(conf){
 	if(conf){
+		this.plugin_rockofficefileid= 0;
 		this.plugin_rockoffice_conf = conf;
 		this.plugin_rockofficeopen();
+		if(conf.erand)js.plugin_rockofficestartv();
 	}
 }
 
@@ -26,7 +28,7 @@ js.plugin_rockofficeopen = function(){
 	};
 	ws.onerror = function(e){
 		js.plugin_rockofficebool = false;
-		//setTimeout('js.plugin_rockofficeopen()',3000);
+		js.plugin_rockofficetime = setTimeout('js.plugin_rockofficeopen()',5000);
 	};
 	ws.onmessage = function(evt){
 		js.plugin_rockofficebool = true;
@@ -41,9 +43,35 @@ js.plugin_rockofficemessage = function(d){
 	if(d.waitmsg)js.msg('wait',jm.base64decode(d.waitmsg));
 	if(d.msg)js.msg('success',jm.base64decode(d.msg));
 	if(d.xxtype=='glast'){
-		$.get('api.php?m=upload&a=editfileb&fileid='+d.fileid+'', function(s){
-			js.plugin_rockoffice_conf = '';
-			if(s)js.msg('success',s);
-		});
+		js.plugin_rockofficegetfile(d.fileid);
 	}
+}
+
+js.plugin_rockofficegetfile = function(fid){
+	if(this.plugin_rockofficefileid == fid)return;
+	this.plugin_rockofficefileid  = fid;
+	$.get('api.php?m=upload&a=editfileb&fileid='+fid+'', function(s){
+		js.plugin_rockoffice_conf = '';
+		if(s)js.msg('success',s);
+	});
+}
+
+js.plugin_rockofficestart = function(){
+	var d = this.plugin_rockoffice_conf;
+	if(!d)return;
+	if(this.plugin_rockofficefileid == d.fileid)return;
+	$.get('api.php?m=upload&a=editfilec&fileid='+d.fileid+'&erand='+d.erand+'', function(s){
+		if(s=='start'){
+			js.msg('wait','获取编辑文件中...');
+			js.plugin_rockofficegetfile(d.fileid);
+		}
+		if(s=='wait'){
+			js.plugin_rockofficestartv();
+		}
+	});
+}
+
+js.plugin_rockofficestartv = function(){
+	clearTimeout(js.plugin_rockofficestarts);
+	js.plugin_rockofficestarts = setTimeout('js.plugin_rockofficestart()',10*1000);
 }

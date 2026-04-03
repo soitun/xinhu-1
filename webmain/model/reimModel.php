@@ -380,7 +380,7 @@ class reimClassModel extends Model
 		$yylx	= '2';
 		if($this->rock->get('cfrom')=='reim')$yylx='1';
 		$dboaj	= m('admin');
-		$where	= $dboaj->getjoinstr('receid', $this->adminid);
+		$where	= $dboaj->getjoinstr('receid', $uid);
 		$rows 	= $this->db->getrows('[Q]im_group',"`valid`=1 and `type`=2 and `yylx` in(0,".$yylx.") $where $whe",'`id`,`name`,`url`,`face`,`num`,`pid`,`iconfont`,`iconcolor`,`types`,`urlpc`,`urlm`','`sort`');
 		$dbs 	= m('im_menu');
 		$mdbs 	= m('menu');

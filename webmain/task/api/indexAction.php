@@ -63,7 +63,21 @@ class indexClassAction extends apiAction
 		$page 	= (int)$this->post('page');
 		$rows 	= m('agent:'.$num.'')->getdata($this->adminid, $num, $event, $page);
 		
-		$this->showreturn($rows);
+		return returnsuccess($rows);
+	}
+	
+	public function initApiCheck()
+	{
+		//额外判断的是从业主那读取数据
+		if(A=='getyydata'){
+			$openlx = (int)$this->get('openlx','0');
+			if($openlx == 4){
+				$num 	= $this->get('num');
+				$to 	= m('im_group')->rows("`num`='$num' and `type`=2 and `types`='业主'");
+				if($to == 1)return true;
+			}
+		}
+		return false;
 	}
 	
 	public function yyoptmenuAction()

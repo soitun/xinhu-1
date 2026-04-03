@@ -25,14 +25,18 @@ c.oldban=function(){
 }
 
 c.jiaxiaji=function(){
-	openinput(modename,modenum,'0&def_pid='+a.changeid+'','opegs{rand}');
+	if(a.changedata.level==3){
+		js.alert('菜单最多三级，不能在加下级了');
+	}else{
+		openinput(modename,modenum,'0&def_pid='+a.changeid+'','opegs{rand}');
+	}
 }
 
 function anbtsenb(bo){
 	get('btnjiaxiaji_{rand}').disabled=bo;
 }
 
-bootparams.itemclick=function(){
+bootparams.itemclick=function(d){
 	anbtsenb(false);
 }
 bootparams.beforeload=function(){

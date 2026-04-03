@@ -70,6 +70,9 @@ $(document).ready(function(){
 		search:function(){
 			var s=get('key_{rand}').value;
 			a.setparams({key:s},true);
+		},
+		view:function(){
+			
 		}
 	};
 	js.initbtn(c);

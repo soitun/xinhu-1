@@ -27,12 +27,18 @@ function m($name)
 		$nas	= $asq[1];
 		$nac	= $asq[0];
 		$pats	= $nac.'/';
+		
+		if(VERSION >= '2.7.3' && $nac == 'flow'){
+		//	$_pats	= ''.ROOT_PATH.'/'.PROJECT.'/model/'.$nac.'/'.$nac.'Base.php';
+		//	if(file_exists($_pats))include_once($_pats);
+		}
+		
 		$_pats	= ''.ROOT_PATH.'/'.PROJECT.'/model/'.$nac.'/'.$nac.'.php';
 		if(file_exists($_pats)){
 			include_once($_pats);
 			$class	= ''.$nac.'Model';
 			$cls	= new $class($nas);
-		}	
+		}
 	}
 	$class		= ''.$nas.'ClassModel';
 	$path		= ''.ROOT_PATH.'/'.PROJECT.'/model/'.$pats.''.$nas.'Model.php';
