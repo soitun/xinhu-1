@@ -158,4 +158,27 @@ class logClassModel extends Model
 			'wduarr' => $wduarr
 		);
 	}
+	
+	/**
+	*	读取php错误信息文件
+	*/
+	public function readPHPerr()
+	{
+		$path = ''.ROOT_PATH.'/'.UPDIR.'/phperrors.log';
+		$time = 0;
+		if(!file_exists($path))return $time;
+		$bstr 	= file_get_contents($path);
+		if(isempt($bstr))return $time;
+		$arr 	= explode("\n", $bstr);
+		foreach($arr as $nstr)if(!isempt($nstr)){
+			$nstr = str_replace('\\','/', $nstr);
+			$nstr = str_replace(ROOT_PATH.'/','', $nstr);
+			$this->addlogs('PHP错误', substr($nstr,0, 480), 2, array(
+				'optname' => '系统'
+			));
+			$time ++;
+		}
+		@unlink($path);
+		return $time;
+	}
 }

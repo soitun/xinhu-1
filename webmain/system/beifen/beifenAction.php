@@ -256,7 +256,7 @@ class beifenClassAction extends Action
 		$rows 	= $obj->getall('1=1');
 		$atable = array();
 		$count 	= m('flow_log')->rows('1=1');
-		if($count < 10000)return '操作记录少于1W条，不需要分表';
+		//if($count < 10000)return '操作记录少于1W条，不需要分表';
 		
 		$alltabls 	= $this->db->getalltable();
 		$barr		= $this->createbiao(1, $alltabls);
@@ -299,6 +299,8 @@ class beifenClassAction extends Action
 		$lognab = 'flow_log'.$biao.'';
 		if(in_array(''.PREFIX.''.$lognab.'',$alltabls))return $this->createbiao($xu+1, $alltabls);
 		
+		$maxlog	= (int)m('flow_log')->getmou('max(id) as ids', 'id>0') + 1;
+		
 		$sql 	= 'ALTER TABLE `[Q]flow_log` RENAME TO `[Q]'.$lognab.'`;';
 		$bool	= $this->db->query($sql, false);
 		if(!$bool)return returnerror('无法操作:'.$this->db->error().'');
@@ -325,7 +327,7 @@ class beifenClassAction extends Action
   `iszb` tinyint(1) DEFAULT '0' COMMENT '是否转办记录',
   PRIMARY KEY (`id`),
   KEY `table` (`table`,`mid`)
-) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='单据操作记录';
+) ENGINE=MyISAM AUTO_INCREMENT=".$maxlog." DEFAULT CHARSET=utf8 COMMENT='单据操作记录';
 ";
 		$bool	= $this->db->query($sql, false);
 		if(!$bool)return returnerror('无法创建表:'.$this->db->error().'');

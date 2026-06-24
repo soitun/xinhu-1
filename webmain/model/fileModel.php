@@ -178,7 +178,7 @@ class fileClassModel extends Model
 		
 		if($lx>=2){
 			if($isdel){
-				$fstr .= ' <a temp="clo" '.$strd.' class="blue">下载</a>';
+				if($this->adminid > 0)$fstr .= ' <a temp="clo" '.$strd.' class="blue">下载</a>';
 				if($isimg || $this->isoffice($ext) || $this->isyulan($ext))
 					$fstr .= '&nbsp; <a temp="clo" '.$str.' class="blue">预览</a>';
 				if($this->isbianju($ext) && $lx==3)$fstr .='`'.$rs['id'].'`'; //用于编辑

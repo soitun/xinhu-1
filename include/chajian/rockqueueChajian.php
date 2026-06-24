@@ -13,17 +13,21 @@ class rockqueueChajian extends Chajian
 	
 	private $cmdshell;
 	
+	private $serverpushurl	= '';
+	
 	//初始化配置读取
 	protected function initChajian()
 	{
 		$this->rockqueue_host = getconfig('rockqueue_host', $this->rockqueue_host);
 		$this->rockqueue_port = getconfig('rockqueue_port', $this->rockqueue_port);
 		if($this->rockqueue_port==0){
-			$reim 	 = m('reim');
-			$reimhot = $reim->getpushhostport($reim->serverpushurl);
-			$this->rockqueue_host = $reimhot['host'];
-			$this->rockqueue_port = $reimhot['port'];
+			//$reimhot = $reim->getpushhostport($reim->serverpushurl);
+			
+			//$this->rockqueue_host = $reimhot['host'];
+			//$this->rockqueue_port = $reimhot['port'];
 		}
+		
+		$this->serverpushurl  = getconfig('reim_push', m('option')->getval('reimpushurlsystem')); 
 		
 		
 		$this->cmdshell = array(
@@ -129,8 +133,10 @@ class rockqueueChajian extends Chajian
 	*/
 	public function pushdata($rarr)
 	{
+		if(!$this->serverpushurl)return returnerror('未配置服务端');
 		if(is_array($rarr))$rarr = json_encode($rarr);
-		$url = 'http://'.$this->rockqueue_host.':'.$this->rockqueue_port.'/?atype=send&data='.urlencode($rarr).'';
+		$jg  = contain($this->serverpushurl, '?') ? '&' : '?';
+		$url = ''.$this->serverpushurl.''.$jg.'atype=send&data='.urlencode($rarr).'';
 		$reqult = c('curl')->setTimeout(3)->getcurl($url);
 		if($reqult){
 			return returnsuccess($reqult);

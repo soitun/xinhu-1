@@ -78,7 +78,7 @@ js.dw = {
 		if(window['api'] && api.startLocation){
 			js.msg();
 			this.dwbool = true;
-			if(api.systemType=='ios'){
+			if(api.systemType=='ios' || api.systemType=='hongmen'){
 				this.wait(''+api.systemType+'APP定位中...');
 				api.startLocation({},function(ret,err){
 					js.dw.appLocationSuc(ret,err);
@@ -212,7 +212,7 @@ js.dw = {
 			res.accuracy    = jid;
 			this.ondwcall(res);
 		}else{
-			this.geocoder(lat,lng, jid);
+			this.geocoder(lat,lng, jid, res.xytype);
 		}
 	},
 		
@@ -312,14 +312,16 @@ js.dw = {
 	},
 	
 	//搜索位置,2024-07-19改
-	geocoder:function(lat,lng, jid){
+	geocoder:function(lat,lng, jid, xyt){
+		if(!xyt)xyt='0';
 		var errcan  = {
 			latitude:lat,
 			longitude:lng,
 			accuracy:jid,
 			address:'未知位置',
 			addressinfo:'定位成功未知位置',
-			detail:'未知位置'
+			detail:'未知位置',
+			xytype:xyt
 		}
 		$.ajax({
 			url:'api.php?m=kaoqin&a=gcoder',
@@ -386,12 +388,38 @@ js.dw = {
 		}
 	},
 	//计算距离
-	julisuan:function(lat,lng, kqarr, funs){
+	julisuanqq:function(lat,lng, kqarr, funs){
 		var startPoint = new TMap.LatLng(lat, lng);
 		for(var i=0;i<kqarr.length;i++){
 			var path = [startPoint , new TMap.LatLng(parseFloat(kqarr[i].location_x), parseFloat(kqarr[i].location_y))];
 			var distance = TMap.geometry.computeDistance(path);
 			kqarr[i].kqjuli = parseFloat(distance);
+		}
+		funs(kqarr);
+	},
+	
+	//计算距离天地图20260621
+	julisuan:function(lat,lng, kqarr, funs){
+		var startPoint = new T.LngLat(lng, lat),x,y,d;
+		
+		for(var i=0;i<kqarr.length;i++){
+			d = kqarr[i];
+			if(!d.location_x || !d.location_y){
+				kqarr[i].kqjuli= 1000000;
+				continue;
+			}
+			
+			x = parseFloat(d.location_x);
+			y = parseFloat(d.location_y);
+			if(d.xytype != '1'){
+				var wgs = gcj02ToWgs84(y, x);
+				y = wgs.lon;
+				x = wgs.lat;
+			}
+			
+			var distance = startPoint.distanceTo(new T.LngLat(y, x));
+			if(distance<0)distance = 0 - distance;
+			kqarr[i].kqjuli = parseFloat(js.float(distance));
 		}
 		funs(kqarr);
 	}
@@ -406,6 +434,7 @@ appbacklocation=function(res){
 		latitude:latitude,
 		longitude:longitude,
 		accuracy:accuracy,
-		address:res.address
+		address:res.address,
+		xytype:res.xytype
 	});
 }

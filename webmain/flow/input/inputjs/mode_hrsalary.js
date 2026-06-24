@@ -138,22 +138,35 @@ function jisuantongzi(){
 	if(yunci>10)return;
 
 	var i,len=arr.length;
-	var gw = 0,val=0,d,slx;
+	var gw = 0,val=0,d,slx,vals,fid;
 	if(form('postjt'))gw=parseFloat(form('postjt').value);
 	var yf=gw+0,sf=gw+0;//应发,实发
 	//0|字段,1|增加,2|减少,3|仅实发增加,4|仅实发减少,5|仅应发增加,6|仅应发减少
+	
+	var parr = [];
+	
 	for(i=0;i<len;i++){
 		d = arr[i];
 		val=0;
 		slx=d.suantype;
-		if(form(d.fields))val=parseFloat(form(d.fields).value);
+		fid=d.fields;
+		if(form(fid) && fid!='postjt')val  = parseFloat(form(fid).value);
 		
 		if(slx==1 || slx==5)yf=yf+val;//应发增加
 		if(slx==2 || slx==6)yf=yf-val;//应发减少
 		
 		if(slx==1 || slx==3)sf=sf+val;//实发增加
 		if(slx==2 || slx==4)sf=sf-val;//实发减少
+		
+		parr.push({
+			'value':val,
+			'fields':d.fields,
+			'name':d.name,
+			'suantype':d.suantype
+		});
 	}
+	if(js.request('debug'))console.log(parr);
+	
 	form('money').value=js.float(sf);   //实发 
 	form('mones').value=js.float(yf);   //应发 
 	setTimeout('c.rungongsi()',10);

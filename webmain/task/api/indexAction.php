@@ -185,4 +185,35 @@ class indexClassAction extends apiAction
 	public function sgstrs()
 	{
 	}
+	
+	/**
+	*	给自己客户端发送命令
+	*/
+	public function spushAction()
+	{
+		$totype = $this->get('totype');
+		$barr = m('reim')->pushserver('send', array(
+			'sendid' => $this->adminid,
+			'receid' => $this->adminid,
+			'type' => 'toclient', //固定
+			'totype'=> $totype,
+			'burl' => 'api.php?m=index&a=spushb'
+		));
+		if(!$barr['success'])return $barr;
+		c('cache')->del('toclient'.$this->adminid.'');
+		return returnsuccess();
+	}
+	public function spushcAction()
+	{
+		$bstr = c('cache')->get('toclient'.$this->adminid.'');
+		if(!$bstr)return returnerror('bsrr');
+		if($bstr && substr($bstr, 0, 1)=='{')$bstr = json_decode($bstr, true);
+		return returnsuccess($bstr);
+	}
+	public function spushbAction()
+	{
+		$result = $this->jm->base64decode($this->get('result'));
+		c('cache')->set('toclient'.$this->adminid.'', $result, 10);
+		return 'ok';
+	}
 }

@@ -117,20 +117,7 @@ class gerenClassAction extends Action
 		if(getconfig('systype')=='demo')exit('演示上不要修改');
 		$oldpass	= $this->rock->post('passoldPost');
 		$pasword	= $this->rock->post('passwordPost');
-		$msg		= '';
-		if($this->rock->isempt($pasword))$msg ='新密码不能为空';
-		if($msg == ''){
-			$oldpassa	= $this->db->getmou($this->T('admin'),"`pass`","`id`='$id'");
-			if($oldpassa != md5($oldpass))$msg ='旧密码不正确';
-			if($msg==''){
-				if($oldpassa == md5($pasword))$msg ='新密码不能和旧密码相同';
-			}
-		}
-		if($msg == ''){
-			if(!$this->db->record($this->T('admin'), "`pass`='".md5($pasword)."',`editpass`=`editpass`+1", "`id`='$id'"))$msg	= $this->db->error();
-		}
-		if($msg=='')$msg='success';
-		echo $msg;
+		echo m('login')->editpass($id, $oldpass, $pasword);
 	}
 	
 	
@@ -163,7 +150,9 @@ class gerenClassAction extends Action
 	{
 		$s = " and `uid`='$this->adminid' and `tododt`<='$this->now'";
 		$key = $this->post('key');
+		$dt  = $this->post('dt');
 		if($key)$s.=" and (`title` like '%$key%' or `mess` like '%$key%')";
+		if($dt)$s.=" and `optdt` like '$dt%'";
 		return $s;
 	}
 	

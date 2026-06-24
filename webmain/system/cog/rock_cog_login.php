@@ -13,7 +13,11 @@ $(document).ready(function(){
 		},{
 			text:'来源',dataIndex:'cfrom',sortable:true
 		},{
-			text:'IP',dataIndex:'ip'
+			text:'IP',dataIndex:'ip',renderer:function(s){
+				var s1 = s;
+				if(s && s.length>15)s1 = ''+s.substr(0,10)+'<a href="javascript:;" onclick="js.alert(\''+s+'\')">***</a>';
+				return s1;
+			}
 		},{
 			text:'浏览器',dataIndex:'web'
 		},{
@@ -24,11 +28,6 @@ $(document).ready(function(){
 			text:'在线状态',dataIndex:'online',type:'checkbox',sortable:true
 		},{
 			text:'最后在线',dataIndex:'moddt',sortable:true
-		},{
-			text:'极光',dataIndex:'regid',renderer:function(v){
-				var str='&nbsp;';if(v)str='<font color=green>已注册</font>';
-				return str;
-			}
 		},{
 			text:'ID',dataIndex:'id',sortable:true
 		}],

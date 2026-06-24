@@ -2,10 +2,17 @@
 class publicClassAction extends ActionNot{
 	
 	private $officedocx;
+	private $omode 	 = 0;
 	
 	public function initAction()
 	{
-		$this->mweblogin(0, false);
+		$this->omode = (int)$this->get('omode','0');
+		if($this->omode == 3){
+			$token = $this->rock->session('custtoken');
+			if(!$token)exit('无效打开');
+		}else{
+			$this->mweblogin(0, false);
+		}
 		$this->officedocx = ',doc,docx,xls,xlsx,ppt,pptx,';
 	}
 	
@@ -19,6 +26,7 @@ class publicClassAction extends ActionNot{
 		$type 		= $frs['fileext'];
 		$filepath 	= $frs['filepath'];
 		$filepathout= arrvalue($frs, 'filepathout');
+		$frs['omode'] = $this->omode;
 		
 		if(substr($filepath, 0,4)!='http' && isempt($filepathout) && !file_exists($filepath))exit('文件不存在了2');
 		
@@ -89,6 +97,11 @@ class publicClassAction extends ActionNot{
 		return '<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0"><img src="images/mloading.gif" align="absmiddle"> '.$frs['filename'].'('.$frs['filesizecn'].')等待从远程文件下载(<span id="mia0shu">'.$fenz.'</span>)...<script>zmian='.$fenz.';function yunshi(){zmian--;if(zmian==0){location.reload();return;};document.getElementById(\'mia0shu\').innerHTML=zmian};setInterval(yunshi,1000);</script>';
 	}
 	
+	public function isopenw()
+	{
+		return in_array($this->omode, array(3,4));
+	}
+	
 	private function topdfshow($frs, $lx=0)
 	{
 		$officeyl	= getconfig('officeyl','0');
@@ -101,12 +114,11 @@ class publicClassAction extends ActionNot{
 				$filepathout= arrvalue($frs, 'filepathout');
 				if(!isempt($filepathout))$filepath = $filepathout;
 				$url = 'https://view.officeapps.live.com/op/view.aspx?src='.urlencode($filepath).'';
-				//if($officeyl=='3')$url = 'https://docview.mingdao.com/op/view.aspx?src='.urlencode($filepath).'';
 				$this->rock->location($url);
 				return;
 			}
-			if($officeyl=='5'){
-				$url = 'index.php?a=fileedit&m=public&id='.$frs['id'].'&otype=1';
+			if($officeyl=='5' && !$this->isopenw()){
+				$url = 'index.php?a=fileedit&m=public&id='.$frs['id'].'&otype=1&omode='.$this->omode.'';
 				$this->rock->location($url);
 				return;
 			}
@@ -163,6 +175,7 @@ class publicClassAction extends ActionNot{
 		$otype = (int)$this->get('otype','0');
 		$this->smartydata['id'] = $id;
 		$this->smartydata['otype'] = $otype;
+		$this->smartydata['omode'] = $this->omode;
 		$urlbj = getconfig('officebj_url');
 		
 		//说明是自己部署编辑平台用旧的页面

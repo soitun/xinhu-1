@@ -361,7 +361,7 @@ PRIMARY KEY (`id`),KEY `mid` (`mid`)
 	{
 		
 		return array(
-			'flowarr'=>$this->getmodearr()
+			'flowarr'=> false
 		);
 	}
 	
@@ -684,37 +684,73 @@ class mode_'.$modenum.'ClassAction extends inputAction{
 		}
 		
 		$mrs 	= m('mode')->getone($modeid);
-		$rowsa   = m('flow_element')->getall('mid='.$modeid.' and `iszb`=0 and `islu`=1','*','sort,id');
+		$rowsa  = m('flow_element')->getall('mid='.$modeid.' and `iszb`=0 and `islu`=1','*','sort,id');
 		$yczd 	= '';
-		$rows 	= array();
+		$farr	= array();
+		
+		//读取子表看到哪个顺序里
+		$zbrows = m('flow_element')->getall('mid='.$modeid.' and `iszb`>0 and `islu`=1','*','sort,id');
+		if($zbrows)foreach($zbrows as $k=>$rs){
+			$iszb = $rs['iszb'];
+			if(!isset($farr[$iszb]))$farr[$iszb] = $rs;
+		}
+		
+		
+		$tablesa = explode(',', repempt($mrs['tables']));
+		$tablesn = explode(',', repempt($mrs['names']));
+
 		$fzuar  = array();
 		foreach($rowsa as $k1=>$rs1){
 			if($rs1['fieldstype']=='hidden' || $rs1['fieldstype']=='fixed'){
 				$yczd.='{'.$rs1['fields'].'}';
 			}else{
-				$rows[] = $rs1;
+
 				$ftype = arrvalue($rs1, 'ftype');
 				if(isempt($ftype))$ftype = 'defv';
 				if(!isset($fzuar[$ftype]))$fzuar[$ftype] = array();
 				$fzuar[$ftype][]= $rs1;
+				
+				//子表排序里用
+				$sort 	 = $rs1['sort'];
+				$nfarr	 = array();
+				if($farr)foreach($farr as $zb=>$rs2){
+					if($sort>0 && ($sort==$rs2['sort'] || $sort+1 == $rs2['sort'])){
+						$fzuar[$ftype][]= array(
+							'fieldstype' => 'subdata',
+							'attr'		 => '',
+							'fields'	 => 'subdata'.$zb.'',
+							'name'	 => arrvalue($tablesn, $zb-1),
+							'iszb'	 => $zb,
+							'modeid' => $modeid,
+							'isbt'	 => '0',
+						);
+						
+					}else{
+						$nfarr[$zb] = $rs2;
+					}
+				}	
+				$farr = $nfarr;
+				
+				
 			}
 		}
 		
-		$xichu = 0;
-		$s = '';
+		
+		
+		
+
+		$s = '<table width="100%" border="0"><tbody>';
+		
 		foreach($fzuar as $fl=>$fstra){
-			$xichu++;
-			if($xichu>1){
-				$s.='</tbody></table>';
-			}
 			if($fl!='defv'){
-				$s.='<br><div><b>'.$fl.'</b></div>';
+				$s.='<tr><td class="ys2 zbtitle" colspan="4"><strong>'.$fl.'</strong></td></tr>';
 			}
 			$str1 = $this->yubustsin($fstra, $yczd);
 			$s.=$str1;
 			$yczd 	= '';
 		}
 
+		/*
 		$tables	 = $mrs['tables'];
 		if(!isempt($tables)){
 			$tablesa = explode(',', $tables);
@@ -724,28 +760,48 @@ class mode_'.$modenum.'ClassAction extends inputAction{
 				$s.='<tr ><td class="ys2 zbtitle" colspan="4"><strong>'.arrvalue($tablesn, $k).'</strong></td></tr>';
 				$s.='<tr><td class="ys0" colspan="4">'.$str.'</td></tr>';
 			}
+		}*/
+		if($farr)foreach($farr as $zb=>$rs2){
+			$s.='<tr>'.$this->subdatastr($zb, $modeid, arrvalue($tablesn, $zb-1)).'</tr>';
 		}
+		
+		
 		if($xgwj==1)$s.='<td height="34" align="right" class="ys1">^file_content^</td><td colspan="3" class="ys2">	{file_content}</td>';
 		if($base==1)$s.='<tr><td height="34"  align="right" class="ys1">^base_name^</td><td class="ys2" >{base_name}</td><td align="right" class="ys1" >^base_deptname^</td><td class="ys2" >{base_deptname}</td></tr>';
+		
+		
 		$s.='</tbody></table>';
+		return $s;
+	}
+	
+	private function subdatastr($zb,$modeid,$name){
+		$str 	= m('input')->getsubtable($modeid, $zb, 1);
+		$s='<td class="ys2 zbtitle" colspan="4"><strong>'.$name.'</strong></td></tr><tr>';
+		$s.='<td class="ys0" colspan="4">'.$str.'</td>';
 		return $s;
 	}
 	
 	
 	public function yubustsin($rows, $yczd)
 	{
-		$zhang  = array('textarea','htmlediter','uploadfile','uploadimg','changedeptusercheck','relevant');
-		$s = '<table width="100%" border="0"><tbody><tr class="autoyijianview">';
-		$xuo = 0;
+		$zhang  = array('textarea','htmlediter','uploadfile','uploadimg','changedeptusercheck','relevant','subdata');
+		$s 		= '<tr class="autoyijianview">';
 		
-		$zlen= count($rows)-1;
+		$xuo 	= 0;
+		$zlen	= count($rows)-1;
 		foreach($rows as $k=>$rs){
 			$xuo++;
 			$name = '^'.$rs['fields'].'^';
 			if($rs['isbt']=='1')$name='*'.$name.'';
 			if(in_array($rs['fieldstype'], $zhang) || contain($rs['attr'],'maxhang')){
 				if($xuo==2)$s.='<td height="34" align="right" class="ys1"></td><td class="ys2"></td></tr><tr>';
-				$s.='<td height="34" align="right" class="ys1">'.$name.'</td><td colspan="3" class="ys2">{'.$rs['fields'].'}'.$yczd.'</td>';
+				
+				if($rs['fieldstype']=='subdata'){
+					$s.= $this->subdatastr($rs['iszb'], $rs['modeid'], $rs['name']);
+				}else{
+					$s.='<td height="34" align="right" class="ys1">'.$name.'</td><td colspan="3" class="ys2">{'.$rs['fields'].'}'.$yczd.'</td>';
+				}
+				
 				if($xuo==1)$xuo=2;
 			}else{
 				$s.='<td height="34" width="15%" align="right" class="ys1">'.$name.'</td><td  width="35%" class="ys2">{'.$rs['fields'].'}'.$yczd.'</td>';
@@ -1117,18 +1173,10 @@ class mode_'.$modenum.'ClassAction extends inputAction{
 	{
 		$mid 	= (int)$this->get('modeid');
 		$db 	= m('flow_element');
-		
-		$rows 	= $db->getall('mid='.$mid.' and iszb=0','id','sort asc,id asc');
-		foreach($rows as $k=>$rs)$db->update('sort='.$k.'',$rs['id']);
-		
-		$rows 	= $db->getall('mid='.$mid.' and iszb=1','id','sort asc,id asc');
-		foreach($rows as $k=>$rs)$db->update('sort='.$k.'',$rs['id']);
-		
-		$rows 	= $db->getall('mid='.$mid.' and iszb=2','id','sort asc,id asc');
-		foreach($rows as $k=>$rs)$db->update('sort='.$k.'',$rs['id']);
-		
-		$rows 	= $db->getall('mid='.$mid.' and iszb=3','id','sort asc,id asc');
-		foreach($rows as $k=>$rs)$db->update('sort='.$k.'',$rs['id']);
+		$sid 	= c('check')->onlynumber($this->get('sid'));
+		if(!$sid)return;
+		$sida 	= explode(',', $sid);
+		foreach($sida as $k=>$id)$db->update('sort='.$k.'', '`id`='.$id.' and `mid`='.$mid.'');
 	}
 	
 	public function flowcourselistbefore($rows)
@@ -1312,6 +1360,7 @@ class mode_'.$modenum.'ClassAction extends inputAction{
 		if(is_numeric($bhnu))return '模块编号不能用数字';
 		if(strlen($bhnu)<4)return '编号至少要4位';
 		if(c('check')->isincn($bhnu))return '编号不能包含中文';
+		if(c('check')->onlynoen($bhnu))return '编号格式有误';
 		
 		$dbs 	= m('mode');
 		if($dbs->rows("`num`='$bhnu'")>0)return '模块编号['.$bhnu.']已存在';

@@ -76,7 +76,8 @@ $(document).ready(function(){
 	changeweizhi{rand}=function(oi){
 		var d = a.getData(oi);
 		var url = '?m=kaoqin&d=main&a=locationchange';
-		if(!isempt(d.location_x))url+='&location_x='+d.location_x+'&location_y='+d.location_y+'&scale='+d.scale+'';
+		if(!d.xytype)d.xytype='0';
+		if(!isempt(d.location_x))url+='&location_x='+d.location_x+'&location_y='+d.location_y+'&scale='+d.scale+'&xytype='+d.xytype+'';
 		openxiangs('选择位置',url,'','backshow{rand}');
 	}
 	backshow{rand}=function(d){

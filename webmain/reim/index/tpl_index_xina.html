@@ -19,7 +19,7 @@
 <script type="text/javascript" src="web/res/js/jquery.1.9.1.min.js"></script>
 <script type="text/javascript" src="js/js.js?<?=time()?>"></script>
 <script type="text/javascript" src="js/base64-min.js"></script>
-<script type="text/javascript" src="web/res/js/nwjs.js"></script>
+<script type="text/javascript" src="web/res/js/nwjs.js?<?=time()?>"></script>
 <script type="text/javascript" src="web/res/mode/menu/jquery-rockmenu.js"></script>
 <script type="text/javascript" src="web/res/js/notify.js?<?=time()?>"></script>
 <script type="text/javascript" src="web/res/js/strformat.js?<?=time()?>"></script>
@@ -29,7 +29,7 @@
 <script type="text/javascript" src="web/res/perfectscrollbar/jquery.mousewheel.js"></script>
 <script type="text/javascript" src="web/res/js/jquery-imgview.js"></script>
 <script type="text/javascript" src="web/res/js/jquery-rockupload.js"></script>
-<script type="text/javascript" src="mode/plugin/jquery-rockmodels.js"></script>
+<script type="text/javascript" src="mode/plugin/jquery-rockmodels.js?<?=time()?>"></script>
 <script type="text/javascript" src="web/res/js/jquery-changeuser.js"></script>
 <style>
 .lefticons{color:#ffffff;height:70px;line-height:70px}
@@ -52,6 +52,7 @@ adminip			= '<?=$da['ip']?>';
 systitle		= '<?=$da['title']?>';
 companymode		= <?=(getconfig('companymode')? 'true' : 'false')?>;
 video_bool		= <?=(getconfig('video_bool')? 'true' : 'false')?>;
+firstbool		= false;
 function globalbody(){
 	token 		= js.getoption('admintoken', token);
 	adminid		= '<?=$da['adminid']?>';
@@ -62,15 +63,21 @@ function globalbody(){
 	adminranking= '<?=$da['my']['ranking']?>';
 }
 function initbody(){
+	if(clientbool && typeof(rockclient)=='undefined')return;
+	if(firstbool)return;
+	firstbool = true;
 	reim.init();
 }
 function winfocus(){
 	window.focus();
 }
+function reimReady(){
+	initbody();
+}
 </script>
 </head>
 
-<body style="overflow:hidden" oncontextmenu="return false" scroll="no">
+<body style="overflow:hidden" oncontextmenu="return reim.rightmenu(event)" scroll="no">
 
 <div class="cursor lefticons" align="center" id="reimcog" style="position:fixed;bottom:0px;left:0px;width:60px;line-height:50px;height:50px;color:#ffffff;font-size:16px;"><i class="icon-reorder"></i></div>
 

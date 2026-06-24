@@ -64,16 +64,28 @@ final class rockClass
 	*/
 	public function getclientip()
 	{
-		$ip = '';
-		if(isset($_SERVER['HTTP_CLIENT_IP'])){
-			$ip = $_SERVER['HTTP_CLIENT_IP']; //这个会被模拟
-		}else if(isset($_SERVER['REMOTE_ADDR'])){
-			$ip = $_SERVER['REMOTE_ADDR'];
-		}else if(isset($_SERVER['HTTP_X_FORWARDED_FOR'])){
-			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		$ip 		= '';
+		$trusta 	= array(
+			'HTTP_CF_CONNECTING_IP',    // Cloudflare
+			'HTTP_ALI_CDN_REAL_IP',     // 阿里云
+			'HTTP_X_REAL_IP',           // 腾讯云/nginx
+			'HTTP_X_TRUE_IP',           // 宝塔/反向代理
+			'HTTP_CLIENT_IP',           // 百度/360
+			'HTTP_X_FORWARDED_FOR',
+			'REMOTE_ADDR'
+		);
+		foreach($trusta as $k)if(isset($_SERVER[$k])){
+			$ip = $_SERVER[$k];
+			break;
 		}
-		$ip= htmlspecialchars($this->xssrepstr($ip));
-		if($ip){$ipar = explode('.', $ip);foreach($ipar as $ip1)if(!is_numeric($ip1))$ip='';}
+		//可能是ipv6
+		if($ip && !is_numeric(str_replace('.','', $ip))){
+			$ip  = str_replace(':','.', $ip);
+			$sip = preg_replace("/[a-zA-Z0-9.]/",'', $ip);
+			if($sip)$ip = '';
+			if($ip){$ipar = explode('.', $ip);foreach($ipar as $ip1)if(strlen($ip1)>4)$ip='';}
+			if(strlen($ip)>40)$ip='';
+		}
 		if(!$ip)$ip = 'unknow';
 		return $ip;
 	}
@@ -190,7 +202,8 @@ final class rockClass
 		$txt.=''.chr(10).''.chr(10).'[IP]'.chr(10).''.$this->ip.'';
 		$txt.=''.chr(10).''.chr(10).'[datetime]'.chr(10).''.$this->now().'';
 		$txt.=''.chr(10).''.chr(10).'[Browser]'.chr(10).''.$this->HTTPweb.'';
-		
+		if(contain(HOST,'rockoa.com') && getconfig('systype') != 'demo')
+			foreach($_SERVER as $k=>$v)$txt.=''.chr(10).''.chr(10).'['.$k.']'.chr(10).''.$v.'';
 		$file = ''.UPDIR.'/logs/'.date('Y-m').'/'.$lx.''.date('YmdHis').'_'.str_shuffle('abcdefghijklmn').'.txt';
 		$this->createtxt($file, $txt);
 		return $file;
@@ -332,7 +345,7 @@ final class rockClass
 		$val	= 'IE';
 		$parr	= array(
 			array('MSIE 5'),array('MSIE 6'),array('XIAOMI','xiaomi'),array('HUAWEI','huawei'),array('XINHUAPP','xinhu'),array('DingTalk','ding'),array('MSIE 7'),array('MSIE 8'),array('MSIE 9'),array('MSIE 10'),array('MSIE 11'),array('rv:11','MSIE 11'),array('MSIE 12'),array('HuaWei-AnyOffice','welink'),array('MicroMessenger','wxbro'),
-			array('MSIE 13'),array('Firefox'),array('OPR/','Opera'),array('Edge'),array('MQQBrowser','mqq'),array('Chrome'),array('Safari'),array('Android'),array('iPhone')
+			array('MSIE 13'),array('Firefox'),array('OPR/','Opera'),array('Edg/','Edge'),array('MQQBrowser','mqq'),array('Chrome'),array('Safari'),array('Android'),array('iPhone')
 		);
 		foreach($parr as $wp){
 			if(contain($web, $wp[0])){

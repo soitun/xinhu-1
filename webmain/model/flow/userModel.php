@@ -192,8 +192,10 @@ class flow_userClassModel extends flowModel
 
 			$arr['user'] = strtolower($user);
 			$arr['name'] = $name;
+			$randslat		= md5($this->rock->jm->getRandkey().time().rand(100,99999));
 			
-			$arr['pass']  		= md5('123456');
+			$arr['pass']  		= md5('123456'.$randslat);
+			$arr['randslat']  	= $randslat;
 			$arr['sort']  		= $sort+$k+1;
 			$arr['workdate']  	= arrvalue($rs,'workdate', $this->rock->date);
 			$arr['adddt']  		= $this->rock->now;

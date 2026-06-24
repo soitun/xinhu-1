@@ -43,6 +43,7 @@ class baseClassModel extends Model
 			$urs	= $this->usrr[$ckey];
 		}else{
 			$urs 	= $this->db->getone('`[Q]admin`','`id`='.$uid.'');
+			if(!$urs)$urs = array();
 			$companyid = arrvalue($urs,'companyid','1');
 			if(ISMORECOM){
 				$comid	= arrvalue($urs, 'comid','0');
@@ -107,6 +108,7 @@ class baseClassModel extends Model
 	*/
 	public function hjfieldsRows($rows, $hjfields)
 	{
+		$hjfields = str_replace(',', '', $hjfields);
 		$farr = explode('@', $hjfields);
 		$barr = array('id'=>0, 'colums_type'=>'hj');
 		foreach($farr as $fid){
@@ -149,7 +151,8 @@ class baseClassModel extends Model
 			}
 		}
 		if($strv){
-			$tjval = eval('return '.$strv.';');
+			$strv  = preg_replace("/[a-zA-Z_]/",'', $strv);
+			$tjval = @eval('return '.$strv.';');
 		}
 		if($xshu > 0)$tjval = $this->rock->number($tjval, $xshu);
 		return array(

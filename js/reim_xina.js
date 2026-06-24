@@ -24,7 +24,7 @@ var reim={
 			nwjs.removetray();
 			reim.onoffline(0);
 		}
-		this.resize();
+		this.resizeok();
 		nwjs.serverdata=function(d){
 			return reim.serverdata(d);
 		}
@@ -39,8 +39,9 @@ var reim={
 		var fse=js.getoption('loginface');
 		token  =js.getoption('admintoken');
 		if(fse)get('myface').src=fse;
-
+		
 		nwjs.createtray(document.title+'-'+adminname, 1);
+		
 		strformat.ismobile=0; 
 		//禁止后退
 		try{
@@ -124,9 +125,22 @@ var reim={
 		}
 		$('#reim_keysou').keyup(function(){reim.searchss();});
 		$('#reim_keysou').click(function(){reim.searchss();});
-		
+		this.addEventListener();
 	},
-	resize:function(){
+	addEventListener:function(){
+		if(clientbool && window.rockclient){
+			js.chajian('downfile', {});
+			rockclient.rockFun('addEventListener', {
+				name:'main'
+			}, function(ret){
+				if(ret.stype=='downfile'){
+					ret.cjfile = 'downfile';
+					js.chajian('downfilecall', ret);
+				}
+			});
+		}
+	},
+	resizeok:function(){
 		viewheight = winHb(); //可操作高度
 		$('#mindivshow').css('height',''+(viewheight)+'px');
 		if(reim.centlistobj)reim.centlistobj.css('height',''+(viewheight-60)+'px');
@@ -137,14 +151,23 @@ var reim={
 			hei=parseInt(o.attr('resizeh'));
 			o.css('height',''+(viewheight-hei)+'px');
 		}
-		//控制最小宽高
+		var w1 = 800,h1 = 500;
 		if(nwjsgui){
-			var w1 = 900,h1 = 600;
 			var wid = winWb();
 			var hei = winHb();
 			if(wid<w1)nwjs.win.width=w1;
 			if(hei<h1)nwjs.win.height=h1;
 		}
+		if(clientbool){
+			var wid = winWb()+30;
+			var hei = winHb()+50;
+			if(wid<w1)rockclient.rockFun('resize',{width:w1,height:0});
+			if(hei<h1)rockclient.rockFun('resize',{width:0,height:h1});
+		}
+	},
+	resize:function(){
+		clearTimeout(reim.resizebo);
+		reim.resizebo = setTimeout('reim.resizeok()',100);
 	},
 	timeload:function(){
 		this.timeloads++;
@@ -248,6 +271,10 @@ var reim={
 		var i,ds=da.rows;
 		for(i=0;i<ds.length;i++){
 			this.showhistorys(ds[i], true);
+		}
+		if(ds.length > 0){
+			var obj = this.chatobj[this.nowtabs];
+			if(obj && obj.isexist && obj.isexist())obj.receivedata();
 		}
 	},
 	//初始加载数据
@@ -463,6 +490,8 @@ var reim={
 	//服务端发消息调用opener.reim.serversend(a);
 	serversend:function(a){
 		if(!this.connectbool)return false;
+		if(a.sendname)a.sendname = 'base64:'+jm.base64encode(a.sendname);
+		if(a.gname)a.gname = 'base64:'+jm.base64encode(a.gname);
 		websocketobj.send(a);
 		return true;
 	},
@@ -488,6 +517,8 @@ var reim={
 	receivemesb:function(d, lob){
 		var lx=d.type,sendid=d.adminid;
 		d.zijiid = adminid;
+		if(d.sendname && d.sendname.indexOf('base64:')==0)d.sendname = jm.base64decode(d.sendname.substr(7));
+		if(d.gname && d.gname.indexOf('base64:')==0)d.gname = jm.base64decode(d.gname.substr(7));
 		if(lx=='offoline'){
 			this.otherlogins();
 			return;
@@ -515,6 +546,18 @@ var reim={
 		}
 		if(lx=='calltonghua'){
 			this.calltonghua(d);
+		}
+		
+		
+		if(lx=='toclient'){
+			var burl = d.burl;
+			var bstr = this.serverdata(d);
+			if(!bstr)bstr='ok';
+			if(burl){
+				if(typeof(bstr)=='object')bstr = JSON.stringify(bstr);
+				burl+='&result='+jm.base64encode(bstr)+'&adminid='+adminid+'&token='+token+'';
+				$.get(burl);
+			}
 		}
 	},
 	addonline:function(s1,isa,zt){
@@ -643,6 +686,7 @@ var reim={
 			this.showhistorys(ds[i]);
 		}
 		if(i>0)$('#historylist_tems').hide();
+		this.showbadge('chat');
 	},
 	grouptype:function(did, lx){
 		var s = '';
@@ -698,7 +742,7 @@ var reim={
 		if(glx)return s;
 		if(!pad){o.append(s);}else{o.prepend(s)}
 		$('#historylist_tems').hide();
-		this.showbadge('chat');
+		if(pad)this.showbadge('chat');
 		if(pad && (d.type=='gout' || d.type=='uout'))this.outgroup.updatelist(d.type,d.receid,d);
 	},
 	historyright:function(o1,e,num){
@@ -817,7 +861,7 @@ var reim={
 		s+='<div class="toolsliao" style="background:none" id="toolsliao_'+num+'">';
 		s+='	<span title="表情" tools="emts" class="cursor"><i class="icon-heart"></i></span>';
 		s+='	<span title="文件/图片" tools="file" class="cursor"><i class="icon-folder-close"></i></span>';
-		if(nwjsgui){
+		if(nwjsgui || clientbool){
 			s+='	<span title="粘贴图片" tools="paste" class="cursor"><i class="icon-paste"></i></span>';
 			s+='	<span title="截屏(Alt+A)" tools="crop" class="cursor"><i class="icon-cut"></i></span>';
 		}
@@ -1069,7 +1113,7 @@ var reim={
 			if(isempt(url)){
 				url = '?d=we&m=ying&num='+d.num+''; //先默认用移动端
 			}
-			w = 350;
+			w = 450;
 		}
 		var jg = (url.indexOf('?')>-1)?'&':'?';
 		url+=''+jg+'openfrom=reim';
@@ -1077,7 +1121,7 @@ var reim={
 		if(d.num=='kqdaka'){
 			this.opendaka();return;
 		}
-		if(url.substr(0,4)=='http' && url.indexOf(HOST)<0 && nwjsgui){
+		if(url.substr(0,4)=='http' && url.indexOf(HOST)<0 && (nwjsgui || clientbool)){
 			nwjs.openurl(url);
 		}else{
 			js.open(url, w,h,'agent'+d.num+'');
@@ -1109,6 +1153,9 @@ var reim={
 		if(!so)so = 0;
 		zoi+=parseInt(so);
 		nwjs.changeicon(zoi);
+		if(clientbool){
+			rockclient.rockFun('setBadge',{num:zoi});
+		}
 		if(lx=='chat')this.showbadge('wait');
 	},
 	clickcog:function(o1){
@@ -1121,7 +1168,7 @@ var reim={
 		});
 		var d = [{'name':'消息记录',lx:'jl'},{'name':'刷新',lx:'sx'},{'name':'创建会话',lx:'create'},{'name':'修改密码',lx:'pass'},{'name':'切换主题',lx:'theme'}];
 		if(companymode)d.push({'name':'切换单位',lx:'qhqy'});
-		if(nwjsgui)d.push({'name':'下载管理器',lx:'down'});
+		if(nwjsgui || (clientbool && rockclient.systemType=='win'))d.push({'name':'下载管理器',lx:'down'});
 		d.push({'name':'设置',lx:'cog'});
 		d.push({'name':'退出',lx:'exit'});
 		this.cogmenu.setData(d);
@@ -1149,7 +1196,13 @@ var reim={
 		if(lx=='pass')this.editpass();
 		if(lx=='qhqy')this.changecom();
 		if(lx=='theme')this.changetheme();
-		if(lx=='down')js.open('?d=reim&m=record&a=download', 630,450,'downs');
+		if(lx=='down'){
+			if(clientbool){
+				rockclient.rockFun('openWin',{'url':'edge://downloads/', width:900,height:550});
+				return;
+			}
+			js.open('?d=reim&m=record&a=download', 630,450,'downs');
+		}
 	},
 	//创建会话
 	creategroup:function(){
@@ -1253,11 +1306,10 @@ var reim={
 		js.setoption('setchatlistw', ''+kg+'');
 	},
 	cogshow:function(){
-		//nw.Window.open('file:///F:/IIS/demo/webrtc_v5_latest/quick-demo-js/index.html');return;
 		var chs= (this.getsound())?'checked':'';
 		var ch1= (this.getzhuom())?'checked':'';
 		var num = 'userinfo_cogshow';
-		var s = '<div align="center"><div align="left" style="width:300px;margin-top:40px;padding:15px;background:var(--main-bgcolor);border-radius:5px;border:var(--border)">';
+		var s = '<div align="center"><div align="left" style="width:360px;margin-top:30px;padding:15px;background:var(--main-bgcolor);border-radius:5px;border:var(--border)">';
 		s+='	<div style="line-height:30px"><b>设置</b></div>';
 		s+='	<div style="padding:10px 0px;border-top:var(--border)"><label><input '+ch1+' onclick="reim.setzhuom(this)" type="checkbox">新信息桌面提醒</label></div>';
 		s+='	<div style="padding:10px 0px;border-top:var(--border)"><label><input '+chs+' onclick="reim.setsound(this)" type="checkbox">新信息声音提示</label></div>';
@@ -1265,30 +1317,60 @@ var reim={
 		
 		chs = 'checked';
 		ch1 = '';
-		if(js.getoption('sendkuijie')=='1'){
-			ch1='checked';chs='';
-		}			
-		s+='	<div style="padding:10px 0px;border-top:var(--border)">发送快捷键：<label><input onclick="reim.setsendkkj(0)" '+chs+' type="radio" name="sendkuijie">Enter</label>&nbsp; <label><input onclick="reim.setsendkkj(1)" '+ch1+' type="radio" name="sendkuijie">Ctrl+Enter</label></div>';
+		if(js.getoption('sendkuijie')=='1'){ch1='checked';chs='';}		
 		
-		//s+='	<div style="padding:10px 0px;border-top:1px #eeeeee solid">列表列宽：<label><input onclick="reim.setchatlistw(220)" checked type="radio" name="chatlistw">正常</label>&nbsp; <label><input onclick="reim.setchatlistw(230)" type="radio" name="chatlistw">宽点</label>&nbsp; <label><input onclick="reim.setchatlistw(250)" type="radio" name="chatlistw">大宽</label></div>';
-
-		if(nwjsgui){
-			var ips = nwjs.getipmac();
-			var d = nw.process.versions;
-			var json = nw.App.manifest;
-			s+='<div style="padding:10px 0px;border-top:var(--border)">开机启动：<button type="button" class="cursor" onclick="reim.kaijistart(0)">启动</button>&nbsp;<button type="button" class="cursor" onclick="reim.kaijistart(1)">删除</button>&nbsp;<button type="button" class="cursor" onclick="reim.kaijistart(2)">快捷方式</button></div>';
-			s+='<div style="padding:10px 0px;border-top:var(--border)">我局域网IP：'+ips.ip+'</div>';
-			s+='<div style="padding:10px 0px;border-top:var(--border)">我的MAC地址：'+ips.mac+'</div>';
-			s+='<div style="padding:10px 0px;border-top:var(--border)">此客户端版本：V'+json.version+'，内核nwjs-'+d.nw+'</div>';
-		}
-		
+		s+='	<div id="setgetipmac" style="padding:10px 0px;border-top:var(--border)">发送快捷键：<label><input onclick="reim.setsendkkj(0)" '+chs+' type="radio" name="sendkuijie">Enter</label>&nbsp; <label><input onclick="reim.setsendkkj(1)" '+ch1+' type="radio" name="sendkuijie">Ctrl+Enter</label></div>';
 		s+='	<div style="padding:10px 0px;border-top:var(--border)">网络IP：'+this.myip+'</div>';
-		s+='	<div style="padding-top:10px;"><input onclick="reim.closetabs(\''+num+'\')" type="button" value="关闭" class="btn btn-danger"></div>';
+		s+='	<div style="padding-top:10px;"><button onclick="reim.closetabs(\''+num+'\')" type="button" class="btn btn-danger">关闭</button></div>';
 		s+='</div></div>';
-		this.addtabs(num,s);
+		var bo = this.addtabs(num,s);
+		if(!bo)this.getipmac();
 		get('changesoundid').value=notifyobj.sound;
 	},
+	getipmac:function(){
+		var sfengs=function(ips, not){
+			var s = '';
+			if(ips.ostype.indexOf('win')==0)s+='<div style="padding:10px 0px;border-top:var(--border)">开机启动：<button type="button" class="cursor" onclick="reim.kaijistart(0)">启动</button>&nbsp;<button type="button" class="cursor" onclick="reim.kaijistart(1)">删除</button>&nbsp;<button type="button" class="cursor" onclick="reim.kaijistart(2)">快捷方式</button></div>';
+			s+='<div style="padding:10px 0px;border-top:var(--border)">我局域网IP：'+ips.ip+'</div>';
+			s+='<div style="padding:10px 0px;border-top:var(--border)">我的MAC地址：'+ips.mac+'</div>';
+			s+='<div style="padding:10px 0px;border-top:var(--border)">此客户端版本：V'+ips.version+'，内核：'+ips.osinfo+'</div>';
+			if(not)s+='<div style="padding:10px 0px;border-top:var(--border)">更新：<button type="button" class="cursor" onclick="reim.kaijistart(3)">更新客户端</button>&nbsp;<button type="button" class="cursor" onclick="reim.kaijistart(4)">清除缓存</button></div>';
+			$('#setgetipmac').after(s);
+			js.setoption('myneiip', ips.ip);
+			js.setoption('myneimac', ips.mac);
+		}
+		if(nwjsgui){
+			var ips = nwjs.getipmac();
+			ips.version = nw.App.manifest.version;
+			ips.osinfo = 'nwjs-'+nw.process.versions.nw;
+			ips.ostype = require('os').platform();
+			sfengs(ips);
+		}
+		if(clientbool){
+			rockclient.rockFun('getIpMac',{}, function(ips){
+				ips.ostype	= rockclient.systemType;
+				ips.version = rockclient.appVersion;
+				sfengs(ips, (rockclient.systemType=='win'));
+			});
+		}
+	},
 	kaijistart:function(lx){
+		if(clientbool){
+			if(lx==3 || lx==4){
+				js.confirm('需要关闭软件才能继续操作，是否要关闭？', function(jg){
+					if(jg=='yes'){
+						var tupe = 'updateApp';if(lx==4)tupe='clearCache';
+						rockclient.rockFun(tupe);
+					}
+				});
+				return;
+			}
+			var opta = ['start','delstart','desktop'];
+			rockclient.rockFun('createShortcut',{stype:opta[lx]}, function(){
+				js.msgok('操作成功');
+			});
+			return;
+		}
 		var dz = '加入开机启动.vbs';
 		if(lx==1)dz = '删除开机启动.vbs';
 		if(lx==2)dz = '创建桌面快捷方式.vbs';
@@ -1296,7 +1378,7 @@ var reim={
 	},
 	//内部服务处理
 	serverdata:function(a){
-		var lx = a.atype;
+		var lx = a.atype;if(a.totype)lx=a.totype;
 		if(lx=='focus')nwjs.winshow();
 		if(lx=='crop')this.cropScreen(true);
 		if(lx=='notify')this.shownotify(a);
@@ -1317,6 +1399,52 @@ var reim={
 			var url =NOWURL+'?d=reim&m=tonghua&channel='+channel+'&id='+d.adminid+'';
 			js.open(url, 350,530,'',{},{resizable:false,'always_on_top':true});
 		}
+	},
+	rightmenu:function(e){
+		var o = e.target;
+		if((o.nodeName=='INPUT' && o.type=='text') || o.nodeName=='TEXTAREA'){
+			this.inputobj = $(o);
+			if(!this.inputrightobj)this.inputrightobj=$.rockmenu({
+				data:[],width:100,itemsclick:function(d){reim.inputrightclick(d);}
+			});
+			this.selectionStart = o.selectionStart;
+			this.selectionEnd   = o.selectionEnd;
+			var sel = o.value.substr(o.selectionStart,o.selectionEnd-o.selectionStart);
+			this.selectValue	= sel;
+			var d = [];
+			d.push({name:'复制',lx:1});
+			d.push({name:'剪切',lx:2});
+			d.push({name:'粘贴',lx:0});
+			d.push({name:'清空',lx:4});
+			if(!sel){
+				d[0].name='<font color=#aaaaaa>'+d[0].name+'</font>';d[0].lx = 3;
+				d[1].name='<font color=#aaaaaa>'+d[1].name+'</font>';d[1].lx = 3;
+			}
+			this.inputrightobj.setData(d);
+			this.inputrightobj.showAt(e.clientX,e.clientY);
+		}
+		return false;
+	},
+	inputrightclick:function(d){
+		if(d.lx==0){
+			nwjs.getClipboard((snr)=>{
+				var nr = this.inputobj.val();
+				if(snr){
+					var s1 = nr.substr(0,this.selectionStart)+snr+nr.substr(this.selectionEnd);
+					this.inputobj.val(s1).focus();
+				}
+			});	
+		}
+		if(d.lx==1){
+			js.setcopy(this.selectValue);
+		}
+		if(d.lx==2){
+			js.setcopy(this.selectValue,true);
+			var nr = this.inputobj.val();
+			var s1 = nr.substr(0,this.selectionStart)+nr.substr(this.selectionEnd);
+			this.inputobj.val(s1).focus();
+		}
+		if(d.lx==4)this.inputobj.val('').focus();
 	}
 };
 
@@ -1365,10 +1493,6 @@ function chatcreate(cans){
 		this.showobj.scroll(function(){
 			me.onsscroll();
 		});
-		this.inputobj.contextmenu(function(e){
-			me.inputright(this,e);
-			return false;
-		});
 	};
 	this.showtools=function(){
 		if(this.dktype){
@@ -1383,12 +1507,15 @@ function chatcreate(cans){
 			return false;
 		});
 	};
+	this.isexist = function(){
+		return get('viewtitle_'+this.num+'');
+	};
 	this.showtitle=function(){
-		var o = $('#viewtitle_'+this.num+''),s='';
+		var o = $('#viewtitle_'+this.num+''),s='',hw=24;
 		var od = this.receinfo;
 		if(!od)od={deptid:'-2'};
 		s+='<table width="100%"><tr>';
-		s+='<td width="30" align="center"><div style="padding:0px 10px;padding-right:8px;height:30px;overflow:hidden"><img onclick="$.imgview({url:this.src})" style="border-radius:5px" src="'+this.face+'" height="30" width="30"></div></td>';
+		s+='<td width="'+hw+'" align="center"><div style="padding:0px 10px;padding-right:8px;height:'+hw+'px;overflow:hidden"><img onclick="$.imgview({url:this.src})" style="border-radius:5px" src="'+this.face+'" height="'+hw+'" width="'+hw+'"></div></td>';
 		s+='<td height="50" width="100%">';
 		s+='	<div temp="usname_'+this.num+'"><b style="font-size:16px;">'+this.name+'</b>';
 		if((this.type=='group' || this.type=='gout') && this.usershu)s+='('+this.usershu+')';
@@ -1733,7 +1860,7 @@ function chatcreate(cans){
 		js.msg('none');
 		var o	= this.inputobj;
 		var nr	= strformat.sendinstr(o.val());
-		nr		= nr.replace(/</gi,'&lt;').replace(/>/gi,'&gt;').replace(/\n/gi,'<br>').replace(/ /gi,'&nbsp;');
+		nr		= nr.replace(/</gi,'&lt;').replace(/>/gi,'&gt;').replace(/\n/gi,'<br>').replace(/ /gi,'&nbsp;').replace(/ /gi,'&nbsp;');
 		if(ssnr)nr=ssnr;
 		if(isempt(nr))return false;
 		if(nr.indexOf('@')<0)this.atid=0;
@@ -1990,17 +2117,19 @@ function chatcreate(cans){
 		if(!this.clipobj1)this.clipobj1 = nw.Clipboard.get();
 		return this.clipobj1;
 	};
-	this.pasteimg=function(){
-		var snr  = this.clipobj().get('png');
-		//console.log(this.clipobj().readAvailableTypes());
-		if(!snr){
-			//js.msgerror('剪切板上没有图片');
+	this.pasteimg=function(bo){
+		if(clientbool){
+			this.inputobj.focus();
+			rockclient.rockFun('CtrlImg');
 			return;
 		}
+		if(!nwjsgui)return false;
+		var snr  = this.clipobj().get('png');
+		if(!snr)return;
 		this.readclipshow(snr);
 	};
 	this.cropScreen=function(){
-		this.clipobj().clear();
+		if(nwjsgui)this.clipobj().clear();
 		jietubool = true;
 		im.cropScreen();
 	};
@@ -2009,46 +2138,6 @@ function chatcreate(cans){
 		uploadobj.setuptype(this.uptypes);
 		uploadobj.setupurl(this.upurl);
 		uploadobj.change(o1, 0);
-	};
-	this.inputright=function(o,e){
-		if(!this.inputrightobj)this.inputrightobj=$.rockmenu({
-			data:[],width:100,itemsclick:function(d){me.inputrightclick(d);}
-		});
-		this.selectionStart = o.selectionStart;
-		this.selectionEnd   = o.selectionEnd;
-		var sel = o.value.substr(o.selectionStart,o.selectionEnd-o.selectionStart);
-		this.selectValue	= sel;
-		var d = [];
-		d.push({name:'复制',lx:1});
-		d.push({name:'剪切',lx:2});
-		if(nwjsgui){d.push({'name':'粘贴',lx:0});d.push({'name':'粘贴图片',lx:5});}
-		d.push({name:'清空',lx:4});
-		if(!sel){
-			d[0].name='<font color=#aaaaaa>'+d[0].name+'</font>';d[0].lx = 3;
-			d[1].name='<font color=#aaaaaa>'+d[1].name+'</font>';d[1].lx = 3;
-		}
-		this.inputrightobj.setData(d);
-		this.inputrightobj.showAt(e.clientX,e.clientY);
-	};
-	this.inputrightclick=function(d){
-		if(d.lx==0){
-			var snr  = this.clipobj().get('text'),nr = this.inputobj.val();
-			if(snr){
-				var s1 = nr.substr(0,this.selectionStart)+snr+nr.substr(this.selectionEnd);
-				this.inputobj.val(s1).focus();
-			}
-		}
-		if(d.lx==1){
-			js.setcopy(this.selectValue,true);
-		}
-		if(d.lx==2){
-			js.setcopy(this.selectValue,true);
-			var nr = this.inputobj.val();
-			var s1 = nr.substr(0,this.selectionStart)+nr.substr(this.selectionEnd);
-			this.inputobj.val(s1).focus();
-		}
-		if(d.lx==4)this.inputobj.val('').focus();
-		if(d.lx==5)this.pasteimg();
 	};
 	this.contright=function(o1,e){
 		var o=$(o1),rnd=o.attr('rand');
@@ -2077,7 +2166,7 @@ function chatcreate(cans){
 			if(isch)d.push({name:'撤回',lx:2});
 		}
 		if(this.type!='gout' && this.rightdata.sendid==adminid)d.push({name:'已读未读情况',lx:6});
-
+		//if(e.target.nodeName=='IMG')d.push({name:'下载图片',lx:7,src:e.target});	
 		this.rightqipaoobj.setData(d);
 		this.rightqipaoobj.showAt(e.clientX,e.clientY);
 	};
@@ -2115,6 +2204,9 @@ function chatcreate(cans){
 		};
 		if(lx==5)this.staradd(this.rightdata);
 		if(lx==6)this.showhuizhi();
+		if(lx==7){
+			
+		}
 	};
 	this.rebianji=function(o1,rnd){
 		var d  = this.listdata[rnd],
@@ -2321,10 +2413,11 @@ var im = {
 			var oatg = nwjs.getpath();
 			nw.Shell.openItem(''+oatg+'/images/reimcaptScreen.exe');
 		}
+		if(clientbool)rockclient.rockFun('cropScreen');
 	},
 	windowfocus:function(){
 		if(jietubool){
-			reim.chatobj[reim.nowtabs].pasteimg();
+			reim.chatobj[reim.nowtabs].pasteimg(jietubool);
 		}
 		jietubool = false;
 		notifyobj.close();
@@ -2355,19 +2448,23 @@ strformat.clickface=function(rnd,os){
 }
 
 strformat.openurl=function(dz){
-	if(!nwjsgui){
-		window.open(dz);
-	}else{
+	if(nwjsgui || clientbool){
 		nwjs.openurl(dz);
-		//js.open(dz,1000,600);
+	}else{
+		window.open(dz);
 	}
 }
 
-strformat.clickfile=function(fid,lx, type){
+strformat.clickfile=function(fid,lx, type,o){
 	if(isNaN(fid)){
-		reim.outgroup.fileopt(fid,lx,type);
+		reim.outgroup.fileopt(fid,lx,type,o);
 	}else{
-		js.fileopt(fid,lx);
+		js.fileopt(fid,lx, function(da){
+			da.obj = o;
+			da.cjfile = 'downfile';
+			da.otype = type;
+			js.chajian('downfilenei', da);
+		});
 	}
 }
 strformat.clickimg=function(o1){
@@ -2500,15 +2597,18 @@ reim.outgroup={
 			}
 		}
 	},
-	fileopt:function(id1,lx, type){
-		js.loading('加载中...');
+	fileopt:function(id1,lx, type, o){
+		js.loading('加载中...');var me = this;
 		var surl = this.geturl('fileinfo');
 		if(fileinfoa[type])surl = fileinfoa[type];
 		reim.ajax(surl,{lx:lx,id:id1},function(ret){
 			var da = ret.data,url = da.url;
 			js.unloading();
 			if(da.lx==1){
-				js.location(url);
+				da.fileid = id1;
+				da.obj	  = o;
+				da.otype  = type;
+				js.chajian('downfile', da);
 			}else{
 				js.open(url, 1000,500);
 			}

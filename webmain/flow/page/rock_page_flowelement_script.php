@@ -91,7 +91,9 @@ c.getbtnstr('旧版','oldban','','','right');
 c.getbtnstr('刷新排序','rexuhao','','','right');
 c.rexuhao=function(){
 	if(!this.xuanmoxbo())return;
-	js.ajax(js.getajaxurl('rexuhao','flow','main'),{modeid:mkid},function(){
+	var da = a.getData(),sid=[];
+	for(var i=0;i<da.length;i++)sid.push(da[i].id);
+	js.ajax(js.getajaxurl('rexuhao','flow','main'),{modeid:mkid,sid:sid.join(',')},function(){
 		a.reload();
 	},'get','','刷新中...,刷新成功');
 }

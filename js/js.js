@@ -207,7 +207,7 @@ js.open=function(url,w,h,wina,can,wjcan){
 	for(var o1 in a1)s+=','+o1+'='+a1[o1]+'';
 	var ja=(url.indexOf('?')>=0)?'&':'?';
 	if(wina)url+=''+ja+'winobj='+wina+'';
-	 if(clientbool){
+	if(clientbool && window.rockclient){
 		if(url.substr(0,4)!='http')url=NOWURL+url;
 		rockclient.rockFun("openWin",{
 			url:url,
@@ -342,7 +342,7 @@ js.winiframe=function(tit, url){
 js.downshow=function(id, fnun, cans){
 	if(this.fileoptWin(id))return;
 	if(appobj1('openfile', id))return;
-	if(!isempt(fnun)){this.fileopt(id, 1);return false;}
+	if(!isempt(fnun) || clientbool){this.fileopt(id, 1);return false;}
 	var url = 'api.php?m=upload&id='+id+'&a=down';
 	if(cans)for(var i in cans)url+='&'+i+'='+cans[i]+'';
 	this.location(url);
@@ -397,17 +397,18 @@ js.msgerror=function(txt){
 }
 js.unloading=function(){js.msg();}
 //文件操作id文件id,lx0预览,1下载,2编辑
-js.fileopt=function(id,lx){
+js.fileopt=function(id,lx, call, gurl){
 	if(!lx)lx=0;
 	if(ismobile==1 && lx==1 && this.fileoptWin(id))return;
 	js.loading('加载中...');
-	var gurl = 'api.php?a=fileinfo&m=upload&id='+id+'&type='+lx+'&ismobile='+ismobile+'';
+	if(!gurl)gurl = 'api.php?a=fileinfo&m=upload';gurl+='&id='+id+'&type='+lx+'&ismobile='+ismobile+'';
 	$.ajax({
 		type:'get',url:gurl,dataType:'json',
 		success:function(ret){
 			js.unloading();
 			if(ret.success){
 				var da = ret.data;
+				if(call)call(da);
 				var ext= da.fileext;
 				var url= da.url;
 				if(da.type==2)js.importplugin('rockoffice',da.editwsinfo);
@@ -441,7 +442,7 @@ js.fileopt=function(id,lx){
 				}else{
 					url+='&wintype=max';
 					if(ismobile==0){
-						if(!nwjsgui){
+						if(!nwjsgui && !clientbool){
 							js.winiframe(da.filename,url);
 						}else{
 							js.open(url, 1000,500);
@@ -754,6 +755,7 @@ js.setcopy	= function(txt,nts){
 	document.execCommand('Copy');
 	if(!nts)js.msg('success','复制成功');
 	$('#copydiv').remove();
+	js.setoption('copycont', txt);
 	return false;
 }
 js.getcopy = function(){
@@ -787,12 +789,12 @@ js.alertclose=function(){
 js.tanstyle = 0;
 js.confirm	= function(txt,fun, tcls, tis, lx,ostr,bstr){
 	if(!lx)lx=0;js.alertclose();
-	var h = '<div style="padding:20px;line-height:30px" align="center">',w=320;
+	var h = '<div style="padding:20px;line-height:30px" class="wrap" align="center">',w=320;
 	if(lx==1)w= 350;
 	if(w>winWb())w=winWb()-10;
 	if(lx==1){
 		if(!tcls)tcls='';if(!ostr)ostr='';if(!bstr)bstr='';
-		h='<div style="padding:10px;" align="center">'+ostr+'';
+		h='<div style="padding:10px;" class="wrap" align="center">'+ostr+'';
 		h+='<div align="left" style="padding-left:10px">'+txt+'</div>';
 		h+='<div ><textarea class="input form-control" id="confirm_input" style="width:'+(w-40)+'px;height:60px;border-radius:5px">'+tcls+'</textarea></div>'+bstr+'';
 	}else if(lx==3){
@@ -1254,7 +1256,8 @@ js.ling = function(w){
 
 js.chajian = function(type, cans){
 	if(!$[type]){
-		js.importjs('mode/plugin/jquery-'+type+'.js?'+js.getrand()+'', function(){$[type](cans);});
+		var typs = cans.cjfile ? cans.cjfile : type;
+		js.importjs('mode/plugin/jquery-'+typs+'.js?'+js.getrand()+'', function(){$[type](cans);});
 	}else{
 		return $[type](cans);
 	}
@@ -1281,4 +1284,15 @@ js.imgview = function(o1, dbo){
 	}else{
 		sfun();
 	}
+}
+
+//向客户端发送命令
+js.cliendsend2026=function(at, cans, fun){
+	if(!cans)cans={};
+	cans.totype = at;
+	js.ajax('api.php?m=index&a=spush',cans, function(ret){
+		if(ret.success){
+			setTimeout(function(){js.ajax('api.php?m=index&a=spushc',{},function(reta){fun(reta);},'get,json');},1000);
+		}else{fun(ret);}
+	},'get,json');	
 }

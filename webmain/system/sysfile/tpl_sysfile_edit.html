@@ -11,25 +11,6 @@
 </style>
 <script>
 var fileext = '<?=$da['fileext']?>';
-function save(o1){
-	var cont = get('content').innerText;
-	js.setmsg('保存中...');
-	o1.disabled = true;
-	js.ajax({
-		type:'post',
-		url:'?m=sysfile&a=savefile&path=<?=$da['filepath']?>',
-		data:{content:cont},
-		success:function(res){
-			if(res=='ok'){
-				js.setmsg('保存成功，可修改继续保存','green');
-				o1.disabled=false;
-			}else{
-				js.setmsg(res);
-				o1.disabled=false;
-			}
-		}
-	});
-}
 function initbody(){
 	var hei = winHb()-40;
 	

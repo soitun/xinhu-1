@@ -8,14 +8,14 @@
 <script type="text/javascript" src="js/js.js"></script>
 <script type="text/javascript" src="js/base64-min.js"></script>
 <script>
-var id = '<?=$da['id']?>',otype='<?=$da['otype']?>',nowda,ldata,erand;
+var id = '<?=$da['id']?>',otype='<?=$da['otype']?>',omode='<?=$da['omode']?>',nowda,ldata,erand;
 function initbody(){
 	erand = js.request('erand');//编辑号
 	js.setmsg('初始中...');
 	
 	$.ajax({
 		type:'get',dataType:'json',
-		url:'api.php?m=upload&a=officeexists&id='+id+'&otype='+otype+'&erand='+erand+'',
+		url:'api.php?m=upload&a=officeexists&id='+id+'&otype='+otype+'&erand='+erand+'&omode='+omode+'',
 		success:function(ret){
 			if(ret.success){
 				var da = ret.data;
@@ -45,7 +45,7 @@ function upstart(da, ci){
 		js.location(ldata.url);
 		return;
 	}
-	var url = 'api.php?m=upload&a=officefstart&id='+id+'&otype='+otype+'';
+	var url = 'api.php?m=upload&a=officefstart&id='+id+'&otype='+otype+'&omode='+omode+'';
 	url+='&zong='+da.zong+'';
 	url+='&ci='+ci+'';
 	url+='&filemid='+da.filemid+'';

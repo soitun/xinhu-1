@@ -29,7 +29,7 @@ class kaoqinjClassAction extends Action
 	//设备搜索命令
 	public function kqjcmdbefore($table)
 	{
-		$optdt= date('Y-m-d H:i:s', time()-10*60);
+		$optdt= date('Y-m-d H:i:s', time()-60*60);
 		m($table)->update('status=5',"`status`=0 and `optdt`<'$optdt'");
 		$key = $this->post('key');
 		$snid = (int)$this->post('snid','0');
@@ -55,9 +55,10 @@ class kaoqinjClassAction extends Action
 			if($zt=='2')$zt = '<font color="#ff6600">已请求</font>';
 			if($zt=='3')$zt = '<font color="red">处理失败</font>';
 			if($zt=='5')$zt = '<font color="#888888">已过期</font>';
+			if($zt=='6')$zt = '<font color="gray">不支持</font>';
 			
 			$rows[$k]['atype']  = $cmds->cmdtype($rs['atype']);
-			if($rs['status']=='5'){
+			if($rs['status']=='5' || $rs['status']=='6'){
 				$rows[$k]['ishui'] = 1;
 			}
 			

@@ -41,22 +41,6 @@ $(document).ready(function(){
 		},{
 			text:'ID',dataIndex:'id'
 		}],
-		load:function(a){
-			if(!bools){
-				var s = '<option value="0">-选择模块-</option>',len=a.flowarr.length,i,csd,types='';
-				for(i=0;i<len;i++){
-					csd = a.flowarr[i];
-					if(types!=csd.type){
-						if(types!='')s+='</optgroup>';
-						s+='<optgroup label="'+csd.type+'">';
-					}
-					s+='<option value="'+csd.id+'">'+csd.name+'</option>';
-					types = csd.type;
-				}
-				$('#mode_{rand}').html(s);
-			}
-			bools=true;
-		},
 		itemclick:function(){
 			btn(false);
 		},
@@ -86,10 +70,14 @@ $(document).ready(function(){
 			a.setparams({mid:modeid},true);
 			var bo = (modeid==0);
 			get('add_{rand}').disabled = bo;
+		},
+		xuanmode:function(o1){
+			js.selectmode(o1, get('modes_{rand}'), function(sna,val,d){
+				c.changemode(val);
+			});
 		}
 	};
 	js.initbtn(c);
-	$('#mode_{rand}').change(function(){c.changemode(this.value)});
 });
 </script>
 
@@ -102,7 +90,10 @@ $(document).ready(function(){
 	<button class="btn btn-default" click="reload" type="button">刷新</button>
 </td>
 <td style="padding-left:10px;">
-	<select style="width:200px" id="mode_{rand}" class="form-control" ><option value="0">-选择模块-</option></select>
+	<div class="btn-group"  style="width:260px;" click="xuanmode">
+		<input class="input" placeholder="-选择模块-" style="flex:1" id="modes_{rand}" readonly>
+		<button class="webbtn webbtn-default">v</button>
+	</div>
 </td>
 <td width="80%"></td>
 <td align="right" nowrap>

@@ -61,7 +61,21 @@ var strformat = {
 			}
 		}
 		str	= str.replace(/\n/gi, '<br>');
+		
+		//@匹配
+		if(str.indexOf('@')>-1){
+			patt1	= new RegExp("@([\\u4e00-\\u9fa5a-zA-Z0-9]+)&nbsp;", "gi");
+			emu		= str.match(patt1);
+			if(emu!=null)for(i=0;i<emu.length; i++){
+				st1 = emu[i];
+				str	= str.replace(st1, '<font onclick="strformat.clickat(this)" class="zhu cursor">'+st1.replace('&nbsp;','')+'</font>&nbsp;');
+			}
+		}
+		
 		return str;
+	},
+	clickat:function(o1){
+		
 	},
 	downshow:function(sid){
 		var url = 'mode/upload/uploadshow.php?id='+sid+'';
@@ -274,11 +288,37 @@ var strformat = {
 			if(!miao)miao = parseInt(d.filesize/1500);
 			s+='<div class="cursor" onclick="strformat.playmp3(\''+d.filepath+'\',0)"><i class="icon-volume-up"></i> '+miao+'"</div>';
 		}else{
-			slx = d.fileext;if(!lj)lj='';
-			if(js.fileall.indexOf(','+slx+',')<0)slx='wz';
-			s='<table><tr><td><div class="qipaofile">'+d.fileext.toUpperCase()+'</div></td><td>'+d.filename+'<br><span style="font-size:12px;color:#888888">('+d.filesizecn+')&nbsp;&nbsp;<a href="javascript:;" onclick="strformat.clickfile(\''+d.fileid+'\',1,\''+type+'\')">下载</a>&nbsp;&nbsp;<a href="javascript:;" onclick="strformat.clickfile(\''+d.fileid+'\',0,\''+type+'\')">预览</a></span></td></tr></table>';
+			s='<table><tr><td><div class="qipaofile">'+d.fileext.toUpperCase()+'</div></td><td>'+d.filename+'<br><span style="font-size:12px;color:gray">('+d.filesizecn+')</span>&nbsp;';
+			s+='<span style="font-size:12px;color:gray;">'+this.filestrlx(d.fileid, type)+'</span>';
+			s+='</td></tr></table>';
 		}
 		return s;
+	},
+	filestrlx:function(fid, type){
+		var s = '';
+		var path = js.getoption('fileinfo'+fid+'');
+		if(path && clientbool){
+			s = '<a href="javascript:;" onclick="strformat.clickfiles(\''+fid+'\',\''+type+'\', this, 0)">打开已下载</a>&nbsp;&nbsp;<a href="javascript:;" onclick="strformat.clickfiles(\''+fid+'\',\''+type+'\', this, 1)">目录</a>';
+		}else{
+			s = '<a href="javascript:;" onclick="strformat.clickfile(\''+fid+'\',1,\''+type+'\', this)">下载</a>&nbsp;&nbsp;<a href="javascript:;" onclick="strformat.clickfile(\''+fid+'\',0,\''+type+'\')">预览</a>';
+		}
+		return s;
+	},
+	clickfiles:function(id1,type, o, lx){
+		var path = js.getoption('fileinfo'+id1+'');
+		rockclient.rockFun('fileExists', {
+			pathbase64:path
+		},function(bo){
+			if(!bo){
+				js.setoption('fileinfo'+id1+'');
+				js.msg('msg','下载好的文件不存在了，请重新下载');
+				$(o).parent().html(strformat.filestrlx(id1, type));
+			}else{
+				rockclient.rockFun((lx==1) ? 'openFolder' : 'openFile', {
+					pathbase64:path
+				});
+			}
+		});
 	},
 	clickfile:function(fid){
 		js.msg('msg','没有开发打开');

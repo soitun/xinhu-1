@@ -30,11 +30,11 @@
 		};
 		this.showview=function(){
 			var s='<div id="imgview_main" style="position:absolute;left:0px;top:0px;width:100%;height:100%;z-index:800">';
-			s+='<div style="position:absolute;z-index:0;left:0px;top:0px;width:100%;height:'+this.mheiht+'px;background-color:rgba(0,0,0,0.6)" id="imgview_mask"></div>';
+			s+='<div style="position:absolute;z-index:0;left:0px;top:0px;width:100%;height:'+this.mheiht+'px;background-color:rgba(0,0,0,0.5)" id="imgview_mask"></div>';
 			s+='<span onclick="$(this).parent().remove()" style="position:fixed;z-index:2;top:2px;right:5px;color:white"><i class="icon-remove"></i></span>';
 			s+='<div id="imgview_span" style="position:fixed;z-index:1;left:47%;top:47%;overflow:hidden;color:white">';
 			s+='	<div id="imgview_spanmask"  style="position:absolute;z-index:1;left:0px;top:0px;background-color:rgba(0,0,0,0);width:100%;height:100%;cursor:move;user-select:none;-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;-khtml-user-select:none;"></div>';
-			s+='	<img style="position:absolute;z-index:0;left:0px;top:0px" id="imgview_spanimg" width="100%" height="100%" src="images/mloading.gif" >';
+			s+='	<img style="position:absolute;z-index:0;left:0px;top:0px;" id="imgview_spanimg" width="100%" height="100%" src="'+this.loadimg()+'" >';
 			s+='</div>';
 			s+='<div style="position:fixed;z-index:2;left:0px;bottom:0px;text-align:center;color:white;width:100%;font-size:20px;background-color:rgba(0,0,0,0.2);height:40px;line-height:40px;overflow:hidden;user-select:none"><i style="cursor:pointer" id="imgview_zoom-out" class="icon-zoom-out" title="缩小"></i> &nbsp; <span id="imgview_nowbili" style="font-size:14px">100%</span> &nbsp; <i style="cursor:pointer" class="icon-zoom-in" title="放大" id="imgview_zoom-in"></i>';
 			s+='  &nbsp; <i style="cursor:pointer" class="icon-move" title="原始大小" id="imgview_zoom-move"></i>';

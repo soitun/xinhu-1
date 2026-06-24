@@ -47,6 +47,7 @@
 			
 			var upurl = '';
 			if(this.openlx==4)upurl = '?d=ye&a=saveup&sysmodenum='+this.modenum+'&sysmid='+this.mid+'&sysuptype=file&openlx='+this.openlx+'';
+			if(this.openlx==3)upurl = '?d=zc&a=saveup&sysmodenum='+this.modenum+'&sysmid='+this.mid+'&sysuptype=file&openlx='+this.openlx+'';
 			this.initupobj.setupurl(upurl);
 		}
 		

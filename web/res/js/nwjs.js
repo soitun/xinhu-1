@@ -15,6 +15,12 @@ var nwjs={
 		
 	},
 	createtray:function(tls, lx){
+		if(clientbool){
+			rockclient.rockFun('createTray',{
+				title:tls
+			});
+			return;
+		}
 		if(!this.nw)return;
 		var icon = 'images/logo.png';
 		if(lx==0)icon='images/logo_hui.png';
@@ -55,7 +61,7 @@ var nwjs={
 		this.addShortcut(kjj);
 		this.addfile();
 		var llq = navigator.userAgent.toLowerCase();
-		try{if(llq.indexOf('windows nt 5')<0)this.udpserver();}catch(e){}
+		//try{if(llq.indexOf('windows nt 5')<0)this.udpserver();}catch(e){}
 	},
 	addShortcut:function(v){
 		var option = {
@@ -74,6 +80,10 @@ var nwjs={
 		js.setoption('kuaijj',val);
 	},
 	removetray:function(){
+		if(clientbool){
+			rockclient.rockFun('removeTray');
+			return;
+		}
 		if(!this.nw)return;
 		if(this.tray)this.tray.remove();
 		this.win.removeAllListeners('close');
@@ -90,6 +100,17 @@ var nwjs={
 		}
 	},
 	runcmd:function(cmd){
+		if(clientbool){
+			rockclient.rockFun('openFile', {
+				path:cmd
+			}, function(ret,err){
+				if(err){
+					js.msg('msg', err.msg);
+					return;
+				}
+			});
+			return;
+		}
 		if(!this.nw)return;
 		if(!this.execcmd)this.execcmd= require('child_process').exec;
 		this.execcmd(cmd);
@@ -99,12 +120,20 @@ var nwjs={
 		this.runcmd(ss);
 	},
 	openurl:function(url){
+		if(clientbool){
+			rockclient.rockFun('openFile', {url:url});
+			return;
+		}
 		this.runcmd(''+this.getpath()+'/images/start.bat '+url+'');
 	},
 	editoffice:function(cstr){
 		this.runcmd(''+this.getpath()+'/images/rockoffice.exe '+cstr+'');
 	},
 	winshow:function(){
+		if(clientbool){
+			rockclient.rockFun('show');
+			return;
+		}
 		if(!this.nw){
 			window.focus();
 			return;
@@ -113,13 +142,12 @@ var nwjs={
 		this.win.focus();
 	},
 	jumpicon:function(oi,bo){
-		if(!this.tray)return;
+		if(!this.tray)return;if(!oi)oi=0;if(oi>60)bo=true;
 		clearTimeout(this.jumptime);
 		var s=this.changeicon(this.wdshu,true);
-		if(oi==1)s='images/logo_none.png';
+		if(oi % 2==0)s='images/logo_none.png';
 		this.tray.icon = s;
-		oi = (oi==1)?0:1;
-		if(!bo)this.jumptime=setTimeout('nwjs.jumpicon('+oi+')',500);
+		if(!bo)this.jumptime=setTimeout('nwjs.jumpicon('+(oi+1)+')',500);
 		if(bo)this.changeicon(this.wdshu);
 	},
 	reload:function(){
@@ -150,6 +178,7 @@ var nwjs={
 		});
 	},
 	getpath:function(){
+		if(clientbool)return rockclient.appPath;
 		if(!this.pathobj)this.pathobj = require('path');
 		var oatg = this.pathobj.dirname(process.execPath);
 		oatg	 = oatg.replace(/\\/g, '/');
@@ -175,7 +204,7 @@ var nwjs={
 		o1.innerHTML='已是最新';
 	},
 	getipmac:function(){
-		var json={ip:'','mac':''};
+		var json={ip:js.getoption('myneiip'),'mac':js.getoption('myneimac')};
 		if(!this.nw)return json;
 		var os = require('os');
 		var network = os.networkInterfaces();
@@ -198,8 +227,24 @@ var nwjs={
 		this.server=false;
 	},
 	socketobj:false,
+	getClipboard:function(ball){
+		var str = '';
+		if(nwjsgui){
+			str = nw.Clipboard.get().get('text');
+			ball(str);
+		}else if(clientbool){
+			rockclient.rockFun('getClipboard',{type:'text'}, function(ret){
+				ball(ret.text);
+			})
+		}else{
+			str = js.getoption('copycont');;
+			if(str)ball(str);
+		}
+	},
+	
+	//20260610弃用此方法
 	udpserver:function(funarr){
-		if(!this.nw)return;
+		return;
 		var http 	= require('http');
 		this.server = http.createServer(function(req, res){
 			var url = req.url.toString(),bstr='ok';

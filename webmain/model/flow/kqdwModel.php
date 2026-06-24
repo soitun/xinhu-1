@@ -55,7 +55,7 @@ class flow_kqdwClassModel extends flowModel
 	public function flowrsreplace($rs, $lx=0)
 	{
 		$week 		= $this->dateobj->cnweek($rs['optdt']);
-		$rs['week'] = $week;
+		$rs['week'] = '周'.$week;
 		if($week=='六' || $week=='日')$rs['ishui']= 1;
 		$rs['type']= arrvalue($this->typearr, $rs['type']);
 		return $rs;

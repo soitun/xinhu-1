@@ -63,6 +63,9 @@ $(document).ready(function(){
 		moreset:function(){
 			addtabs({name:'更多系统设置',num:'moreset',url:'system,cog,moreset',icons:'cog'});
 		},
+		anquanset:function(){
+			addtabs({name:'安全设置',num:'safeset',url:'system,cog,safeset',icons:'shield'});
+		},
 		changebj:function(o1){
 			if(o1.value=='1'){
 				$('#divofficebj_key').show();
@@ -120,13 +123,16 @@ $(document).ready(function(){
 		<table cellspacing="0" width="900" border="0" cellpadding="0">
 		
 		<tr>
-			<td  colspan="4"><div class="inputtitle">基本信息
+			<td  colspan="4"><div style="border-radius:5px" class="inputtitle">基本信息
 			<div style="padding:5px;line-height:18px;font-size:12px;color:#888888">此保存在配置文件下，也可以自己打开配置文件(webmain/webmainConfig.php)来修改</div>
 			</div></td>
 		</tr>
 		
 		<tr>
-			<td  colspan="4" class="tdinput" ><div align="center" style="line-height:30px">系统版本：<b  id="benquan_{rand}" style="font-size:20px"><font color=red>开源版</font></b><input id="isshou_{rand}" type="hidden" class="form-control">&nbsp;&nbsp;<button click="auther" class="btn btn-success btn-xs">系统签授</button>&nbsp;&nbsp;<button click="moreset" style="display:" class="btn btn-default btn-xs">更多设置</button>
+			<td  colspan="4" class="tdinput" ><div align="center" style="line-height:30px">系统版本：<b  id="benquan_{rand}" style="font-size:20px"><font color=red>开源版</font></b><input id="isshou_{rand}" type="hidden" class="form-control">
+			&nbsp;&nbsp;<button click="auther" class="btn btn-success btn-xs">系统签授</button>
+			&nbsp;&nbsp;<button click="moreset" style="display:" class="btn btn-default btn-xs">更多设置</button>
+			&nbsp;&nbsp;<button click="anquanset" class="btn btn-default btn-xs">安全设置</button>
 			</div></td>
 		</tr>
 	

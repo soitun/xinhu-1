@@ -7,6 +7,7 @@ class loginClassAction extends ActionNot{
 		$this->smartydata['ca_adminuser']	= $this->getcookie('ca_adminuser');
 		$this->smartydata['ca_rempass']		= $this->getcookie('ca_rempass');
 		$this->smartydata['ca_adminpass']	= $this->getcookie('ca_adminpass');
+		$this->smartydata['jgheight']		= (int)$this->getcookie('jgheight','40');
 		$this->smartydata['loginyzm']		= (int)getconfig('loginyzm','0'); //登录类型
 		$this->smartydata['platsign']		= $this->getsession('platsign');
 	}
@@ -19,10 +20,12 @@ class loginClassAction extends ActionNot{
 		$rempass= $this->post('rempass');
 		$jmpass	= $this->post('jmpass');
 		$cfrom	= $this->post('cfrom','pc');
+		$jgheight	= (int)$this->post('jgheight','0');
 		if($jmpass == 'true')$pass=$this->jm->uncrypt($pass);
 		$userp	= $user;
 		$arr 	= m('login')->start($user, $pass, $cfrom);
 		$barr 	= array();
+		if($jgheight > 0)$this->rock->savecookie('jgheight', $jgheight);
 		if(is_array($arr)){
 			
 			if(isset($arr['mobile'])){
@@ -62,6 +65,7 @@ class loginClassAction extends ActionNot{
 	/**
 	*	对外的信息收集
 	*/
+	private $inputobj;
 	public function collectAction()
 	{
 		if(!getconfig('authorkey'))return $this->jm->base64decode('6Z2e5o6I5p2D54mI5peg5rOV5L2.55So5q2k5Yqf6IO9');

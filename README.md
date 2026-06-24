@@ -6,11 +6,11 @@
 官网网站：http://www.rockoa.com/  
 源码仅供学习二次开发使用，禁止二次发布，禁止用于商业用途出售等(违者必究)  
 版权：Copyright @2016-2026 信呼开发团队  
-版本整理时间：2026-04-12 23:59:59  
-版本号：V2.7.3  
+版本整理时间：2026-06-25 23:59:59  
+版本号：V2.7.6  
 
 
-### V2.7.3更新说明
+### V2.7.6更新说明
 1、完善系统安全性。  
 2、更多升级日志详见：http://www.rockoa.com/view_core.html  
 
@@ -57,4 +57,5 @@
 14、nwjs的PC客户端框架：https://nwjs.io/  
 15、iconfont图标库：http://www.iconfont.cn/   
 16、腾讯地图：http://map.qq.com/  
-16、nodejs：https://nodejs.org/ 
+17、天地图：https://www.tianditu.gov.cn/  
+18、nodejs：https://nodejs.org/ 

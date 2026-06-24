@@ -26,7 +26,7 @@ if(!defined('ENTRANCE'))define('ENTRANCE', 'index');
 $config		= array(
 	'title'		=> '信呼',
 	'url'		=> '',
-	'urly'		=> 'http://www.rockoa.com/',	//官网域名地址，修改后就无法提供在线升级了。
+	'urly'		=> 'http://www.rockoa.com/',	//官网域名地址，修改后就无法提供在线升级和APP推送了。
 	'db_host'	=> '127.0.0.1',
 	'db_user'	=> 'root',
 	'db_pass'	=> '',
@@ -89,6 +89,14 @@ define('DB_PASS', $config['db_pass']);
 define('DB_BASE', $config['db_base']);
 
 define('UPDIR', $config['updir']);
+
+//设置错误日志保存文件
+if(function_exists('ini_set')){
+	ini_set('log_errors', 1);
+	if(!DEBUG)ini_set('display_errors', 0); 
+	ini_set('error_log',''.ROOT_PATH.'/'.UPDIR.'/phperrors.log');
+}
+
 define('PREFIX', $config['perfix']);
 define('QOM', $config['qom']);
 define('VERSION', $config['version']);

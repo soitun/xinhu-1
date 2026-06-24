@@ -56,6 +56,7 @@ class loginClassAction extends apiAction
 			'apptheme'	=> getconfig('apptheme'),
 			'titleall'	=> TITLE,
 			'regtype'	=> getconfig('regtype','0'), //是否可注册1,可注册
+			'tabbar'	=> $this->option->getval('appsy_tabbar'),
 		);
 		
 		$this->showreturn($arrs);
@@ -161,6 +162,7 @@ class loginClassAction extends apiAction
 		$call = $this->get('callback');
 		$barr['title'] 	= getconfig('reimtitle','REIM');
 		$barr['stype'] 	= 'new';
+		$barr['ntype'] 	= 'reim2.0';
 		$barr['version']= VERSION;
 		echo ''.$call.'('.json_encode($barr).')';
 	}
@@ -257,20 +259,6 @@ class loginClassAction extends apiAction
 	public function yzxcyAction()
 	{
 		return retuenerror('20240429最新已弃用');
-		$openid = $this->get('openid');
-		$mobile = $this->get('mobile');
-		if(!$openid || !$mobile)return returnerror('err');
-		$mobile = $this->jm->base64decode($mobile);
-		if(!c('check')->iscnmobile($mobile))return returnerror('err2');
-		$where  = "`mobile`='$mobile'";
-		if(m('admin')->rows($where)==0 && m('customer')->rows($where)==0 )return retuenerror('此手机号没在我们系统登记过');
-		$na =  getconfig('titleout');
-		if(!$na)$na = TITLE;
-		return returnsuccess(array(
-			'name' => $na,
-			'key'  => md5(getconfig('openkey')),
-			'logo' => 'images/logo.png'
-		));
 	}
 	
 	/**
@@ -295,47 +283,13 @@ class loginClassAction extends apiAction
 		));
 	}
 	
-	//保存设置
-	public function setwxqyAction()
-	{
-		$callback= $this->get('callback');
-		$num	 = $this->get('num');
-		$agentid = (int)$this->get('agentid');
-		$shouji	 = $this->jm->base64decode($this->get('shouji'));
-		$userid	 = $this->jm->base64decode($this->get('userid'));
-		$urs 	 = m('admin')->getone("`mobile`='$shouji' AND `status`=1");
-		$barr 	 = returnerror('错误');
-		if(!$urs){
-			$barr 	= returnerror('手机号“'.$shouji.'”在设置OA地址里不存在');
-		}else{
-			$barr	= returnsuccess(array());
-		}
-		if($barr['success']){
-			if($urs['type']==1)$this->option->setval('wxqyplat_cnum@-10', $num);
-			$obj = m('zwxqy_user');
-			$uarr['uid'] 	 = $urs['id'];
-			$uarr['mobile']  = $shouji;
-			$uarr['userid']  = $userid;
-			$uarr['agentid'] = $agentid;
-			$uarr['cnum'] 	 = $num;
-			$uarr['state'] = 1;
-			$ors	= $obj->getone("`userid`='$userid'");
-			if($ors){
-				$obj->update($uarr, $ors['id']);
-			}else{
-				$obj->insert($uarr);
-			}
-			$data['user'] = $urs['user'];
-			$barr['data'] = $data;
-		}
-		return ''.$callback.'('.json_encode($barr).')';
-	}
 	
 	//读取表结构
 	public function dbinfoAction()
 	{
 		$tab = $this->get('tab');
 		if(!$tab)return 'error';
+		if(c('check')->onlynoen($tab))return 'err1';
 		$table= ''.PREFIX.''.$tab.'';
 		$rows = $this->db->gettablefields($table);
 		if(!$rows)return '无表';

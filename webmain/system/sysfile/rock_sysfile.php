@@ -24,6 +24,7 @@ $(document).ready(function(){
 				}else{
 					if(d.isedit==1)str='<a href="javascript:;" onclick="openfile{rand}(2,\''+d.path+'\')">查看</a>';
 					if(js.isimg(d.fileext))str='<a href="javascript:;" onclick="$.imgview({url:\''+jm.base64decode(d.path)+'\'})">预览</a>';
+					if(d.isedit==1 && adminid==1)str+='&nbsp;<a href="javascript:;" onclick="openfile{rand}(4,\''+d.path+'\')">编辑</a>';
 				}
 				if(d.isdel==1)str+='&nbsp;<a href="javascript:;" onclick="openfile{rand}(3,\''+d.path+'\')">删</a>';
 				return str;
@@ -77,12 +78,28 @@ $(document).ready(function(){
 			js.ajax(js.getajaxurl('svnupdate','{mode}','{dir}'),false,function(tss){
 				js.msgok(tss);
 			});
+		},
+		createfile:function(){
+			js.prompt('创建文件','当前路径创建文件名如：abc.txt，abc/1.txt',function(lx,txt){
+				if(lx=='yes'&& txt)c.createfiles(txt)
+			});
+		},
+		createfiles:function(wj){
+			js.loading('创建中...');
+			js.ajax(js.getajaxurl('createfile','{mode}','{dir}'),{
+				path:jm.base64encode(nowpath),
+				file:jm.base64encode(wj)
+			},function(tss){
+				js.msgok(tss);
+				a.reload();
+			});
 		}
 	};
 
 	openfile{rand}=function(lx,pts){
 		if(lx==0)a.setparams({path:pts},true);
 		if(lx==2)window.open('?m=sysfile&d=system&a=edit&path='+pts+'');
+		if(lx==4)window.open('?m=sysfile&d=system&a=edite&path='+pts+'');
 		if(lx==3)c.delfile(pts);
 	}
 	
@@ -104,6 +121,7 @@ $(document).ready(function(){
 		<?php
 		if(getconfig('svnpath'))echo '<button class="btn btn-default" click="svnupdate"  type="button">SVN更新系统</button>';
 		?>
+		&nbsp;<button class="btn btn-default" click="createfile"  type="button">新增文件</button>
 		&nbsp;<button class="btn btn-default" click="clearlogs"  type="button">一键清除<?=UPDIR?>/logs下日志文件</button>
 	</td>
 	</tr>

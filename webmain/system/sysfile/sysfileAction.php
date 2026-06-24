@@ -9,7 +9,7 @@ class sysfileClassAction extends Action
 	
 	public function getdataAjax()
 	{
-		$notedit = ',exe,dll,zip,rar,gz,ocx,png,gif,jpg,ico,mp4,wmv,frx,psd,';
+		$notedit = ',exe,dll,zip,rar,gz,ocx,png,gif,jpg,ico,mp4,wmv,frx,psd,doc,docx,xls,xlsx,ppt,pptx,pdf,odt,';
 		$this->notedit = $notedit;
 		$rows = array();
 		$path = '';
@@ -91,15 +91,25 @@ class sysfileClassAction extends Action
 		return '';
 	}
 	
-	public function editAction()
+	private $nowpath = '';
+	private function getpaths()
 	{
-		if($str=$this->iscaozuo())return $str;
 		$path = $this->jm->base64decode($this->get('path'));
 		if(isempt($path))return '无效路径';
 		$path = str_replace('\\','/', $path);
 		$path = str_replace(array('../','..'),'', $path);
 		if(!file_exists(ROOT_PATH.'/'.$path))return '文件不存在';
-		$pathinfo=pathinfo($path);
+		$this->nowpath = $path;
+		return '';
+	}
+	
+	public function editAction()
+	{
+		if($str=$this->iscaozuo())return $str;
+		if($str=$this->getpaths())return $str;
+		
+		$path 	 = $this->nowpath;
+		$pathinfo= pathinfo($path);
 		
 		$filename = $pathinfo['basename'];
 		$filesize = filesize($path);
@@ -114,8 +124,71 @@ class sysfileClassAction extends Action
 		$fileext = strtolower(substr($path,strripos($path,'.')+1));
 		$this->smartydata['fileext'] = $fileext;
 		$this->smartydata['content'] = $content;
-		$this->smartydata['filepath']    = $this->jm->base64encode($path);
+		$this->smartydata['filepath'] = $this->jm->base64encode($path);
 		$this->smartydata['filesize'] = $this->rock->formatsize($filesize);
+	}
+	
+	
+	public function editeAction()
+	{
+		$this->editAction();
+	}
+	
+	//加载文件内容
+	public function loadfileAction()
+	{
+		if($str=$this->iscaozuo())return $str;
+		if($str=$this->getpaths())return $str;
+		$path 	 = $this->nowpath;
+		$lx 	 = (int)$this->get('lx');
+		$paths	 = str_replace('/','@', $path);
+		$earr 	 = false;
+		
+		if($lx == 0){
+			$earr	 = array();
+			$bar     = glob(''.UPDIR.'/logs/editfile/'.$paths.'_*');
+			foreach($bar as $k=>$fil1){
+				$dna = explode('_', $fil1);
+				$earr[] = array(
+					'path' => $this->jm->base64encode($fil1),
+					'optdt'=> date('Y-m-d H:i:s', $dna[1])
+				);
+			}
+		}
+		return array(
+			'content' => file_get_contents($path),
+			'earr'	=> $earr
+		);
+	}
+	//保存文件
+	public function savefileAction()
+	{
+		if($str=$this->iscaozuo())return $str;
+		if($str=$this->getpaths())return $str;
+		$path 	 = $this->nowpath;
+		
+		
+		
+		$content = $this->jm->base64decode($this->post('content'));
+		$oldcont = file_get_contents($path);
+		$nfile 	 = ''.UPDIR.'/logs/editfile/'.str_replace('/','@', $path).'_'.time().'';
+		$this->rock->createtxt($nfile, $oldcont);
+		
+		$bool 	 = @file_put_contents($path, $content);
+		if(!$bool)return '保存失败';
+		
+		return  'ok';
+	}
+	//创建文件
+	public function createfileAjax()
+	{
+		if($str=$this->iscaozuo())return $str;
+		$path = $this->jm->base64decode($this->get('path'));
+		$file = $this->jm->base64decode($this->get('file'));
+		if($path)$path.='/';
+		$this->rock->createtxt(''.$path.''.$file.'', ' ');
+		
+		return '创建成功';
 	}
 	
 	private function delfolder($path)

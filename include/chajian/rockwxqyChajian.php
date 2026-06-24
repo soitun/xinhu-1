@@ -9,11 +9,12 @@ class rockwxqyChajian extends Chajian
 	private $platurl 	= '',$cnum = '';
 	private $optionobj;
 	
+	
 	protected function initChajian()
 	{
 		$this->platurl = getconfig('rockwxqy_url');
 		if(!$this->platurl){
-			$this->platurl = $this->rock->jm->base64decode('aHR0cHM6Ly93eHF5LnJvY2tvYS5jb20v');
+			$this->platurl = $this->rock->jm->base64decode('aHR0cHM6Ly9maWxlLnJvY2tvYS5jb20vd3hxeS5waHA:');
 		}
 		$this->optionobj = m('option');
 		$this->cnum 	 = $this->optionobj->getval('wxqyplat_cnum');
@@ -25,12 +26,18 @@ class rockwxqyChajian extends Chajian
 		return false;
 	}
 	
+	public function setCnum($cnum)
+	{
+		$this->cnum = $cnum;
+		return $this;
+	}
+	
 	public function geturlstr($act, $can=array(),$mact='')
 	{
 		$url = $this->platurl;
 		$mode= 'wxqyopen';
 		if($mact)$mode = $mact;
-		$url.= 'index.php?a='.$act.'&m='.$mode.'';
+		$url.= '?a='.$act.'&m='.$mode.'';
 		$url.= '&cnum='.$this->cnum.'&xinhukey='.getconfig('xinhukey').'';
 		if(is_array($can))foreach($can as $k=>$v)$url.='&'.$k.'='.$v.'';
 		return $url;

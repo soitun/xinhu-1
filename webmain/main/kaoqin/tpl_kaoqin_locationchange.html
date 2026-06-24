@@ -13,89 +13,109 @@ body, button, input, select, textarea {
 }
 
 </style>
-<script charset="utf-8" src="https://map.qq.com/api/js?v=2.exp&key=<?=$da['qqmapkey']?>"></script>
+<script src="https://api.tianditu.gov.cn/api?v=4.0&tk=<?=c('tianditu')->getKey()?>" type="text/javascript"></script>
 <script src="js/jquery.js"></script>
 <script src="js/base64-min.js"></script>
+<script src="js/jsmap.js"></script>
 <script>
 
 var callback = '<?=$callback?>'; //回调函数
+var otype 	 = '<?=$rock->get('otype')?>';
+var address  = '';
+var addressinfo  = false;
+var geocode  = false;
+
 var init = function() {
-    var center = new qq.maps.LatLng(<?=$location_x?>,<?=$location_y?>);
-    map = new qq.maps.Map(document.getElementById('container'),{
-        center: center,
-        zoom: <?=$scale?>
-    });
+	var location_x = <?=$location_x?>;
+	var location_y = <?=$location_y?>;
+	var xytype = <?=$rock->get('xytype','0')?>;
+	var scale = <?=$scale?>;
 	
-	marker = new qq.maps.Marker({
-        position: center,
-        map: map,
-		draggable:true,
-		title:'点地图确定位置'
-    });
-    
-	//点击地图切换位置
-	qq.maps.event.addListener(map, 'click', function(evt) {
-		marker.setPosition(evt.latLng);
-    });
+	if(typeof(T)=='undefined'){
+		document.getElementById('container').innerHTML = '无效的地图key';
+		return;
+	}
+	if(xytype==0){
+		const wgs = gcj02ToWgs84(location_y, location_x);
+		location_y = wgs.lon;
+		location_x = wgs.lat;
+	}
 	
-	return;
-	infoWin = new qq.maps.InfoWindow({
-        map: map
-    });
-    infoWin.open();
-    infoWin.setContent('位置：');
-    infoWin.setPosition(map.getCenter());
+	map = new T.Map('container');
+	var lnglat = new T.LngLat(location_y, location_x);
+    map.centerAndZoom(lnglat, scale);
+	
+	marker = new T.Marker(lnglat);
+    map.addOverLay(marker);
+	map.addControl(new T.Control.Zoom());
+	
+	map.addEventListener("click", function(e){
+		var lantemp = new T.LngLat(e.lnglat.getLng(), e.lnglat.getLat());
+		marker.setLngLat(lantemp);
+		searchSou(e.lnglat);
+	});
 }
+
+//搜索地址信息
+function searchSou(zb){
+	if(otype != 'lu')return;
+	if(!geocode)geocode = new T.Geocoder();
+	geocode.getLocation(zb,searchResult);
+}
+
+
+function searchResult(result){
+	if(result.getStatus() == 0){
+		address = result.getAddress();
+		var d1 = result.addressComponent;
+		addressinfo = {
+			province:d1.province,
+			city:d1.city,
+			street:d1.address,
+			town:d1.town,
+			address:address
+		}
+	}
+}
+
 function qudong(){
-	var as = marker.getPosition();
+	var as = marker.getLngLat();
 	var x 	= as.getLat();
 	var y 	= as.getLng();
 	var zoom = map.getZoom();
-	var a = {x:x,y:y,zoom:zoom};
+	var a = {x:x,y:y,zoom:zoom,address:address,addressinfo:addressinfo};
 	if(callback!=''){
 		try{
 			parent[callback](a);
 			parent.js.tanclose('winiframe');
 		}catch(e){}
 	}
+	if(!address)return false;
+	return a;
 }
-var citylocation = false;
 function dingwei(){
-	var key = prompt('请输入格式(地址 城市)如：鼓浪屿 厦门');
-	if(key){
-		$.ajax({
-			url:'api.php?m=kaoqin&a=suggestion',
-			data:{key:jm.base64encode(key)},
-			dataType:'json',
-			success:function(ret){
-				if(ret.status==0){
-					var res = ret.data[0];
-					var center = new qq.maps.LatLng(res.location.lat,res.location.lng);
-					map.setCenter(center);
-					marker.setPosition(center);
-					showinfoWin(res.title+'<br>'+res.address);
-				}else{
-					alert(ret.message);
-				}
-			}
-		});
-	}
-}
-var infoWin = false;
-function showinfoWin(msg){
-	if(!infoWin){
-		infoWin = new qq.maps.InfoWindow({
-			map: map
-		});
-		infoWin.open();
-	}
-    infoWin.setContent(msg);
-    infoWin.setPosition(map.getCenter());
+	$.get('?m=kaoqin&d=main&a=locationip', function(ret){
+		var ret = JSON.parse(ret);
+		if(ret.success){
+			const wgs = gcj02ToWgs84(ret.data.lnt, ret.data.lat);
+			var lnglats = new T.LngLat(wgs.lon, wgs.lat);
+			marker.setLngLat(lnglats);
+			map.panTo(lnglats);
+			searchSou(lnglats);
+		}else{
+			alert(ret.msg);
+		}
+	});
 }
 </script>
 </head>
 <body onload="init()">
-<div style="position:absolute;top:0px;left:40%;z-index:99;padding:5px 20px; background-color:white"><button style="background:#1389D3;color:white;border:none;padding:5px 8px;cursor:pointer" onclick="qudong()">确定</button>&nbsp;点地图确定位置，<a href="javascript:;" onclick="dingwei()">[定位搜索]</a></div>
+<div style="position:absolute;top:0px;left:40%;z-index:999;padding:5px 20px; background-color:white">
+<?php 
+if($rock->get('otype')!='lu')echo '<button style="background:#1389D3;color:white;border:none;padding:5px 8px;cursor:pointer;border-radius:5px" onclick="qudong()">确定</button>&nbsp;';
+?>
+点地图确定位置，<a href="javascript:;" onclick="dingwei()">[定位搜索]</a>
+</div>
 <div style="width:100%;height:100%" id="container"></div>
 </body>
 </html>

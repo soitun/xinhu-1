@@ -107,7 +107,7 @@ function _addbodykey(){
 function openinput(name,num, id,cbal){
 	if(!id)id='0';
 	if(!cbal)cbal='';
-	if(id.substr(0,1)=='0'){name='[新增]'+name+'';}else{name='[编辑]'+name+'';}
+	if((id+'').substr(0,1)=='0'){name='[新增]'+name+'';}else{name='[编辑]'+name+'';}
 	var url='?a=lu&m=input&d=flow&num='+num+'&mid='+id+'';
 	openxiangs(name, url,'', cbal);
 	return false;

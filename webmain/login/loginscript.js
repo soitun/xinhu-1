@@ -1,4 +1,4 @@
-var oldpass='',initlogo='images/logo.png',olduser,loginyzm='',mobilejsho='',abcpass='';
+var oldpass='',initlogo='images/logo.png',olduser,loginyzm='',mobilejsho='',abcpass='',jgheight=0;
 
 function getpassobj(){
 	return $('input[type=password]');
@@ -30,6 +30,7 @@ function initbody(){
 
 function resizewh(){
 	var h = ($(document).height()-530)*0.5;
+	jgheight = h;
 	$('#topheih').css('height',''+h+'px');
 }
 function changeuserface(v){
@@ -89,6 +90,7 @@ function loginsubmit(){
 	data.jmpass	= 'false';
 	data.device = device;
 	data.ltype  = ltype;
+	data.jgheight  = jgheight;
 	data.adminuser = jm.base64encode(user);
 	data.adminpass = jm.base64encode(pass);
 	data.yanzm    = loginyzm;

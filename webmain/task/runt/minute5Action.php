@@ -15,19 +15,16 @@ class minute5ClassAction extends runtAction
 	
 		m('flowbill')->autocheck(); //自动审批作废
 		m('reim')->chatpushtowx($this->enddtss); //REIM消息
+		m('log')->readPHPerr();//读取错误日志记录
+		
 		return 'success';
 	}
 	
 	private function scheduletodo()
 	{
-		$to = m('mode')->rows("`num`='schedule' and `status`=1");
-		if($to==1)m('schedule')->gettododata();//日程
-		
-		$to = m('mode')->rows("`num`='remind' and `status`=1");
-		if($to==1)m('remind')->todorun();//单据
-		
-		$to = m('mode')->rows("`num`='meet' and `status`=1");
-		if($to==1)m('flow')->initflow('meet')->meettodo(); //会议提醒的
+		if($this->moderock('schedule'))m('schedule')->gettododata();//日程
+		if($this->moderock('remind'))m('remind')->todorun();//单据
+		if($this->moderock('meet'))m('flow')->initflow('meet')->meettodo(); //会议提醒的
 	}
 	
 }

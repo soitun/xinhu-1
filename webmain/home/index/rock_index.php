@@ -218,19 +218,15 @@ $(document).ready(function(){
 		$('#reim_stotal').html('');
 		var str = reimtitle;
 		if(o1)str=strreplace($(o1).text());
-		var ops = js.openrun('reim','winfocus');
-		if(!ops){
-			js.cliendsend('focus',{},false,function(){
+		js.cliendsend2026('focus',{}, function(ret){
+			if(!ret.success){
 				js.confirm('可能没有使用'+str+'的PC客户端，是否打开网页版的？',function(jg){
 					if(jg=='yes'){
-						js.open('?d=reim',260,530,'reim');
+						js.open('?d=reim&a=xina',900,550,'reim');
 					}
 				});
-				return true;
-			});
-		}else{
-			js.open('?d=reim',260,530,'reim');
-		}
+			}
+		});
 	}
 	
 	notifyobj=new notifyClass({

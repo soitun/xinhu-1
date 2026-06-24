@@ -80,14 +80,41 @@ class mode_flowelementClassAction extends inputAction{
 		$mkid = (int)$this->post('mkid','0');
 		$mkrs = false;
 		if($mkid>0)$mkrs = m('flow_set')->getone($mkid);
-		if($this->loadci>1)return array(
-			'rows' => $rows,
-			'mkrs' => $mkrs,
-		);
+		$nrows= $zbarr = $farr = array();
 		
+		
+		if($rows)foreach($rows as $k=>$rs){
+			$iszb = $rs['iszb'];
+			$zbarr[$iszb][] = $rs;
+			if($iszb >0){
+				if(!isset($farr[$iszb]))$farr[$iszb] = $rs;
+			}
+		}
+		
+		if(isset($zbarr[0]))foreach($zbarr[0] as $k=>$rs){
+			$nrows[] = $rs;
+			$sort 	 = $rs['sort'];
+			$nfarr	 = array();
+			if($farr)foreach($farr as $zb=>$rs1){
+				if($sort>0 && ($sort==$rs1['sort'] || $sort+1 == $rs1['sort'])){
+					foreach($zbarr[$zb] as $k1=>$rs2){
+						$nrows[] = $rs2;
+					}
+				}else{
+					$nfarr[$zb] = $rs1;
+				}
+			}
+			$farr = $nfarr;
+		}
+		if($farr)foreach($farr as $zb=>$rs1){
+			foreach($zbarr[$zb] as $k1=>$rs2){
+				$nrows[] = $rs2;
+			}
+		}
+		
+		$rows = $nrows;
 		return array(
-			'rows' 		=> $rows,
-			//'modearr' 	=> m('mode')->getmodearr(),
+			'rows' => $rows,
 			'mkrs' => $mkrs,
 		);
 	}

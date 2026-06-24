@@ -319,10 +319,8 @@ var inputtwo={
 		js.importjs('js/dingwei.js?'+js.getrand()+'', function(){
 			js.dw.dwsuccess = function(ret){
 				this.clearchao();
-				c.selectmapdata.lat=ret.latitude;
-				c.selectmapdata.lng=ret.longitude;
-				c.selectmapdata.zoom=12;
-				c.geocoder(ret.latitude,ret.longitude,ret.accuracy);
+				js.msg('success','定位成功');
+				c.selectmapque({x:ret.latitude,y:ret.longitude,zoom:13,address:ret.address});
 			}
 			js.dw.init();
 			js.dw.start();
@@ -330,101 +328,42 @@ var inputtwo={
 	},
 	selectmap:function(sna,snall,fna,iszb){
 		var hei = winHb()-150;
-		var url = 'https://map.qq.com/api/js?v=2.exp&key=OB4BZ-D4W3U-B7VVO-4PJWW-6TKDJ-WPB77&callback=c.showmap';
 		js.tanbody('selectmap','选择['+fna+']',winWb()-((ismobile==1)?5:80),hei,{
-			html:'<div style="padding:5px"><input onkeyup="if(event.keyCode==13)c.selectmapsou(this)" type="text" placeholder="请输入格式(地址 城市)如：鼓浪屿 厦门" class="inputs"></div><div id="selectmap" style="height:'+(hei-20)+'px;overflow:hidden"></div>',
+			html:'<div style="height:'+hei+'px"><iframe src="" name="winiframe" width="100%" height="100%" frameborder="0"></iframe></div>',
 			btn:[{text:'确定'}]
 		});
 		this.selectmapdata={sna:sna,snall:snall};
 		this._temsel=[24.51036967209648,118.17883729934692,12];
 		if(snall && form(snall) && form(snall).value)this._temsel = form(snall).value.split(',');
-		if(!this.showmapbo){js.importjs(url);}else{this.showmap()}
+		var url = '?m=kaoqin&d=main&a=locationchange&otype=lu&location_x='+this._temsel[0]+'&location_y='+this._temsel[1]+'&scale='+this._temsel[2]+'&xytype=1';
+		winiframe.location.href= url;
 		$('#selectmap_btn0').click(function(){
-			c.selectmapque();
+			try{
+				var da = winiframe.qudong();
+				if(da)c.selectmapque(da);
+			}catch(e){}
 			js.tanclose('selectmap');
-		});
-		$('#selectmap_btn1').click(function(){
-			c.selectmapdinwei();
 		});
 	},
 	selectmapclear:function(sna,snall){
 		if(form(sna))form(sna).value='';
 		if(snall && form(snall))form(snall).value='';
 	},
-	showmapbo:false,
-	showmap:function(){
-		this.showmapbo=true;
-		var center = new qq.maps.LatLng(parseFloat(this._temsel[0]),parseFloat(this._temsel[1]));
-		map = new qq.maps.Map(get('selectmap'),{
-			center: center,
-			zoom: parseFloat(this._temsel[2])
-		});
-		qq.maps.event.addListener(map, 'click', function(event) {
-			marker.setPosition(event.latLng);
-		});
-		marker = new qq.maps.Marker({
-			position: center,
-			map: map,
-			draggable:true,
-			title:'点地图确定位置'
-		});
-	},
-	selectmapsou:function(o1){
-		var val = o1.value;
-		if(!val)return;
-		js.msg('wait','搜索中...');
-		js.ajax('api.php?m=kaoqin&a=suggestion',{key:jm.base64encode(val)},function(ret){
-			js.msg();
-			if(ret.status==0){
-				var res = ret.data[0];
-				var center = new qq.maps.LatLng(res.location.lat,res.location.lng);
-				map.setCenter(center);
-				marker.setPosition(center);
-			}else{
-				js.msg('msg',ret.message);
-			}
-		},'get,json');
-	},
-	selectmapque:function(){
-		var as = marker.getPosition();
-		var x 	= as.getLat();
-		var y 	= as.getLng();
-		var zoom = map.getZoom();
-		this.selectmapdata.lat=x;
-		this.selectmapdata.lng=y;
-		this.selectmapdata.zoom=zoom;
-		this.geocoder(x,y);
-	},
-	//搜索位置
-	geocoder:function(lat,lng, jid){
-		js.msg('wait','确定搜索地址...');
-		js.ajax('api.php?m=kaoqin&a=gcoder',{lat:lat,lng:lng},function(ret){
-			js.msg();
-			if(ret.status==0){
-				var result = ret.result;
-				var d1 = c.selectmapdata;
-				d1.address = result.address;
-				if(!result.address_component)result.address_component={province:'',city:'未知',district:'',street_number:'',street:''}
-				var info = result.address_component;
-				d1.addressinfo = {
-					province:info.province,
-					city:info.city,
-					town:info.district,
-					streetNumber:info.street_number,
-					street:info.street
-				};
-				var sna = d1.sna;
-				if(form(sna))form(sna).value=d1.address+'|'+d1.lat+','+d1.lng+'';
-				var sna1 = d1.snall;
-				if(sna1 && form(sna1)){
-					form(sna1).value=''+d1.lat+','+d1.lng+','+d1.zoom+'';
-					form(sna).value=d1.address;
-				}
-				c.onselectmap(sna,d1);
-			}else{
-				js.msg('msg',ret.message);
-			}
-		},'get,json');
+	selectmapque:function(da){
+		var d1 = this.selectmapdata;
+		d1.lat = da.x;
+		d1.lng = da.y;
+		d1.zoom = da.zoom;
+		d1.address = da.address;
+		d1.addressinfo = (da.addressinfo) ? da.addressinfo : {province:'',city:'',street:'',town:'',address:''};
+		var sna = d1.sna;
+		if(form(sna))form(sna).value=d1.address+'|'+d1.lat+','+d1.lng+'';
+		var sna1 = d1.snall;
+		if(sna1 && form(sna1)){
+			form(sna1).value=''+d1.lat+','+d1.lng+','+d1.zoom+'|1';
+			form(sna).value=d1.address;
+		}
+		this.onselectmap(sna,d1);
 	},
 	xuanfile:function(fid,lx,fname,o1){
 		if(!fname)fname='';

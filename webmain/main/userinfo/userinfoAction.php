@@ -169,4 +169,16 @@ class userinfoClassAction extends Action
 		}
 		return $w;
 	}
+	
+	public function userinfoaftercell($table, $fields, $value, $id)
+	{
+		
+		if($fields=='finger' && !isempt($value)){
+			$nrs = m($table)->getone('`id` not in('.$id.') and ((`id`="'.$value.'" and ifnull(`finger`,"") = "" ) or `finger`="'.$value.'")');
+			if($nrs){
+				echo '考勤机工号“'.$value.'”已关联“'.$nrs['name'].'”，请换其他';
+				m($table)->update('`finger`=null', $id);
+			}
+		}
+	}
 }

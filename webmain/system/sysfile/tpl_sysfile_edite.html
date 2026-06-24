@@ -1,0 +1,142 @@
+<html lang="zh-CN">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title><?=$da['filename']?></title>
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/js.js"></script>
+<script type="text/javascript" src="js/base64-min.js"></script>
+<link rel="stylesheet" type="text/css" href="webmain/css/rock.css"/>
+<link rel="shortcut icon" href="favicon.ico" />
+<style>
+
+</style>
+<script>
+var fileext = '<?=$da['fileext']?>';
+var filepath = '<?=$da['filepath']?>',lastcont='';
+function save(o1){
+	var cont = get('content').value;
+	if(lastcont==cont){
+		js.setmsg('没有修改内容','red');
+		return;
+	}
+	js.setmsg('保存中...');
+	o1.disabled = true;
+	$.ajax({
+		type:'post',
+		url:'?m=sysfile&a=savefile&d=system&path='+filepath+'',
+		data:{content:jm.base64encode(cont)},
+		success:function(bst){
+			if(bst=='ok'){
+				lastcont = cont;
+				o1.disabled = false;
+				js.setmsg('保存成功', 'green');
+				loadfile(filepath, 0);
+			}else{
+				o1.disabled = false;
+				js.setmsg(bst, 'red');
+			}
+		}
+	});
+}
+function initbody(){
+	var hei = winHb()-50;
+	
+	$('#lineheihtss').css('height',''+hei+'px');
+	$('#content').scroll(scrollss);
+	
+	$('#content').css('height',''+(hei)+'px');
+
+	loadfile(filepath, 0);
+}
+
+
+function scrollss(){
+	get('lineheihtss').scrollTop=get('content').scrollTop;
+}
+
+function loadfile(lu,lx){
+	js.setmsg('加载中...');
+	$.ajax({
+		type:'get',
+		dataType:'json',
+		url:'?m=sysfile&a=loadfile&d=system&path='+lu+'&lx='+lx+'',
+		success:function(ret){
+			js.setmsg();
+			loadfileshow(ret.content);
+			if(ret.earr)loadfileshowv(ret.earr);
+		}
+	});
+}
+function loadfileshow(str){
+	$('#content').val(str);
+	lastcont = get('content').value;
+	var cont = str;
+	var arr = cont.split("\n"),i,s1='';
+	for(i=0;i<arr.length;i++){
+		if(i>0)s1+='<br>';
+		s1+=''+(i+1)+'';
+	}
+	$('#lineheiht').html(s1+'<br>&nbsp;');
+}
+function loadfiles(lu,lx){
+	var cont = get('content').value;
+	if(cont != lastcont){
+		js.confirm('修改了内容，没有保存，是否继续读取旧记录？', function(jg){
+			if(jg=='yes')loadfile(lu, lx);
+		});
+		return;
+	}else{
+		loadfile(lu, lx);
+	}
+}
+
+function loadfileshowv(ds){
+	$('#lishilist a[temp]').remove();
+	for(var i=0;i<ds.length;i++){
+		$('#lishilist').append('<a temp="list" style="TEXT-DECORATION:none" onclick="loadfiles(\''+ds[i].path+'\', 1)" class="list-group-item">'+ds[i].optdt+'</a>');
+	}
+}
+</script>
+<style>
+pre span{color:#999999}
+pre font{color:blue}
+table {
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+</style>
+<?php
+echo c('color')->getApptheme(true, false, true);
+?>
+</head>
+
+<body style="background:white;padding:0px;margin:0px;overflow:hidden">
+<table style="width:100%;height:100%" border=0><tr>
+<td valign="top" style="background:#e4e4e4;"><div id="lineheihtss" style="width:50px;height:300px;overflow:hidden"><div style="line-height:20px;padding-top:5px;text-align:right;padding-right:3px;font-size:14px" id="lineheiht">1<br>2<br></div></div></td>
+<td valign="top" style="width:100%;height:100%;padding:0px">
+<div id="contentdiv" style="overflow:hidden;background:#caeccb;display: flex;">
+<textarea id="content" style="height:100%;flex:1;border:0px #aaaaaa solid;background:none;line-height:20px;font-size:14px;overflow:auto;padding:5px;margin:0px;outline:none;" spellcheck="false"></textarea></div>
+</td>
+<td valign="top" align="left">
+	<div style="width:180px" id="lishilist" class="list-group">
+		<div class="list-group-item  list-group-item-info">修改记录</div>
+		<a style="TEXT-DECORATION:none" onclick="loadfiles(filepath, 0)" class="list-group-item">当前版本</a>
+	</div>
+</td>
+</tr>
+<tr>
+<td></td>
+<td style="height:50px;overflow:hidden">
+
+<div >
+<button id="ALTS" onclick="save(this)" class="webbtn">保存</button> <span id="msgview"></span>&nbsp; 
+大小：<?=$da['filesize']?>，查找请用Ctrl+F，文件：<?=$rock->jm->base64decode($da['filepath'])?>
+</div>
+</td>
+</tr>
+</table>
+
+
+</body>
+</html>

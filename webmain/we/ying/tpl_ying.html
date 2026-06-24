@@ -69,6 +69,16 @@ function initbody(){
 	yingyonginit();
 	new touchclass({}).reglongmenu();
 }
+
+
+function reimReady(){
+	js.location = function(dz){
+		var url = dz.replace('a=x','a=p');
+		url = url.replace('a=lum','a=lu');
+		js.open(url, 1000, screen.height-100);
+	}
+}
+
 function initApp(){
 	js.setapptitle(json.name);
 	js.location=function(dz){

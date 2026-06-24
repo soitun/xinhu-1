@@ -26,7 +26,7 @@ class remindClassModel extends Model
 	*	2026-03-06新增
 	*	相关单据显示$lx0详情，1编辑，2列表
 	*/
-	public function relevantshow($xgstr, $lx=0, $fobj=null)
+	public function relevantshow($xgstr, $lx, $fobj)
 	{
 		if(isempt($xgstr))return '';
 		$farr = explode(',', $xgstr);
@@ -38,6 +38,7 @@ class remindClassModel extends Model
 			
 			$flow    = m('flow')->initflow($num, $mid, false);
 			$flow->ismobile = $fobj->ismobile;
+			$flow->openmode = $fobj->openmode;
 			$summary = $flow->moders['summary'];
 			$vstrs 	 = $this->rock->reparr($summary, $flow->rs);
 			if($lx==1){

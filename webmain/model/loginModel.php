@@ -26,7 +26,7 @@ class loginClassModel extends Model
 		$yanzm = $this->rock->request('yanzm');//验证码
 		$ltype = (int)$this->rock->request('ltype',0);//登录类型，1是手机+验证码
 		if(!isempt($yanzm) && strlen($yanzm)!=6)return '验证码必须是6位数字';
-		$cfroar= explode(',', 'pc,reim,weixin,appandroid,mweb,webapp,nppandroid,nppios,nppiosnew,androidapp');
+		$cfroar= explode(',', 'pc,reim,weixin,appandroid,mweb,webapp,nppandroid,nppios,nppiosnew,androidapp,npphongmen');
 		if(!in_array($cfrom, $cfroar))return 'not found cfrom['.$cfrom.']';
 		if($user=='')return '用户名不能为空';
 		if($pass==''&&strlen($token)<8 && $ltype==0)return '密码不能为空';
@@ -43,7 +43,7 @@ class loginClassModel extends Model
 		//5分钟内登录错误超过5次，限制一下
 		$dtstr	= date('Y-m-d H:i:s', time()-5*60);
 		$lasci	= m('log')->rows("`level`=3 and `device`='$device' and `optdt`>'$dtstr'");
-		if($lasci>=5)return '登录错误太频繁，请稍后在试';
+		if($lasci>=5 && getconfig('systype')!='dev')return '登录错误太频繁，请稍后在试';
 		
 		$lasci	= m('log')->rows("`level`=3 and `optdt`='{$this->rock->now}'");
 		if($lasci>0)return '登录太快了，1秒后再试';
@@ -57,7 +57,7 @@ class loginClassModel extends Model
 		}
 
 		
-		$fields = '`pass`,`id`,`name`,`user`,`mobile`,`face`,`deptname`,`deptallname`,`ranking`,`apptx`';
+		$fields = '`pass`,`randslat`,`id`,`name`,`user`,`mobile`,`face`,`deptname`,`deptallname`,`ranking`,`apptx`';
 		$posts  = $user;
 		if($posts=='管理员')return '不能使用管理员的名字登录';
 		
@@ -141,8 +141,8 @@ class loginClassModel extends Model
 					$logins	= '验证码登录';
 				}
 			}else{
-	
-				if(md5($pass)!=$us['pass'])$msg='用户或密码不对'; //密码不对提示
+
+				if(md5($pass.arrvalue($us, 'randslat'))!=$us['pass'])$msg='用户或密码不对'; //密码不对提示
 				
 				if($msg!='' && $pass==md5($us['pass']) && c('cache')->get('login'.$user.'')==$uid){
 					$msg='';
@@ -410,5 +410,31 @@ class loginClassModel extends Model
 			'data' => $data,
 			'dt' => $dt,
 		);
+	}
+	
+	/**
+	*	修改密码
+	*/
+	public function editpass($id, $oldpass, $pasword)
+	{
+		$msg		= '';
+		$isbo		= is_bool($oldpass);
+		if(isempt($pasword))$msg ='新密码不能为空';
+		if($msg == ''){
+			$urs 		= $this->db->getone('[Q]admin',"`id`='$id'");
+			if(!$urs)return 'nouser';
+			if(!$isbo && $urs['pass'] != md5($oldpass.arrvalue($urs,'randslat')))$msg ='旧密码不正确';
+		}
+		if($msg == ''){
+			$randslat		= md5($this->rock->jm->getRandkey().time().rand(100,99999));
+			$editpass 		= '`editpass`+1';
+			if($isbo && $oldpass)$editpass = '0';
+			if(!$this->db->record('[Q]admin', "`pass`='".md5($pasword.$randslat)."',`randslat`='$randslat',`editpass`=".$editpass."", "`id`='$id'"))
+				$msg	= $this->db->error();
+			if($editpass != '0')
+				m('log')->addlogs('修改密码', '['.$urs['name'].']第'.((int)$urs['editpass'] + 1).'次修改密码');
+		}
+		if($msg=='')$msg='success';
+		return $msg;
 	}
 }

@@ -2,11 +2,12 @@
 class flow_userractClassModel extends flowModel
 {
 	protected $flowcompanyidfieds	= 'companyid';
-	public $statearr;
+	public $statearr,$dtobj;
 
 	public function initModel()
 	{
 		$this->statearr 	= explode(',','<font color=blue>待执行</font>,<font color=green>生效中</font>,<font color=#888888>已终止</font>,<font color=red>已过期</font>');
+		$this->dtobj 		= c('date');
 	}
 
 	public function flowrsreplace($rs, $lx=0)
@@ -15,6 +16,12 @@ class flow_userractClassModel extends flowModel
 		if(isset($rs['newname']) && !isempt($rs['newname']) && $rs['newname']!=$rs['uname'])$this->update("`uname`='".$rs['newname']."'",$rs['id']);
 		if($lx==1){
 			$rs['deptname'] = $this->adminmodel->getmou('deptname', $rs['uid']);
+		}
+		if(!isempt($rs['enddt'])){
+			$jg = $this->dtobj->datediff('d', $this->rock->date, $rs['enddt']);
+			if($jg==0)$jg='今';
+			if($jg==1)$jg='明';
+			$rs['jg'] = $jg;
 		}
 		return $rs;
 	}

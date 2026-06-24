@@ -14,36 +14,48 @@ body, button, input, select, textarea {
 
 </style>
 <script src="js/jquery.js"></script>
-<script charset="utf-8" src="https://map.qq.com/api/js?v=2.exp&key=<?=$da['qqmapkey']?>"></script>
+<script src="js/jsmap.js"></script>
+
+<script src="https://api.tianditu.gov.cn/api?v=4.0&tk=<?=c('tianditu')->getKey()?>" type="text/javascript"></script>
+
 <script>
 //初始化函数
 var init = function() {
-	var precision = <?=$da['rs']['precision']?>;
-    var center = new qq.maps.LatLng(<?=$da['rs']['location_x']?>,<?=$da['rs']['location_y']?>);
-    var map = new qq.maps.Map(document.getElementById('container'),{
-        center: center,
-        zoom: <?=$da['rs']['scale']?>
-    });
-    var infoWin = new qq.maps.InfoWindow({
-        map: map
-    });
-    infoWin.open();
-    infoWin.setContent('<?=$da['rs']['content']?>');
-    infoWin.setPosition(map.getCenter());
 	
-	var marker = new qq.maps.Marker({
-        map: map,
-		position:center
-    });
+	if(typeof(T)=='undefined'){
+		document.getElementById('container').innerHTML = '无效的地图key';
+		return;
+	}
+	var location_y = <?=$da['rs']['location_y']?>;
+	var location_x = <?=$da['rs']['location_x']?>;
+	var xytype = <?=arrvalue($da['rs'],'xytype','0')?>;
+	
+	if(xytype==0){
+		const wgs = gcj02ToWgs84(location_y, location_x);
+		location_y = wgs.lon;
+		location_x = wgs.lat;
+	}
+
+	var precision = <?=$da['rs']['precision']?>;
+	zoom= <?=$da['rs']['scale']?>;
+	map = new T.Map('container');
+	var lnglat = new T.LngLat(location_y, location_x);
+    map.centerAndZoom(lnglat, zoom);
+	//创建标注对象
+	var marker = new T.Marker(lnglat);
+    map.addOverLay(marker);
+	
+    map.addControl(new T.Control.Zoom());
+	
+	var markerInfoWin = new T.InfoWindow("<?=$da['rs']['content']?>");
+	marker.openInfoWindow(markerInfoWin);
 	
 	if(precision>0){
-		var circle=new qq.maps.Circle({
-			map:map,
-			strokeWeight:1,
-			center:center,
-			radius:precision
-		});
+	   var circle = new T.Circle(lnglat, precision,{color:"red",weight:1,opacity:0.5,fillColor:"#FFFFFF",fillOpacity:0.5,lineStyle:"solid"});
+		//向地图上添加圆
+		map.addOverLay(circle);
 	}
+
 	var type = '<?=$da['rs']['type']?>';
 	if(type==1){
 		var str = '<div onclick="history.back()" style="position:absolute;top:25px;left:5px; background:white;padding:8px;cursor:pointer"><img height="24" src="images/back.png" align="absmiddle">返回</div>';

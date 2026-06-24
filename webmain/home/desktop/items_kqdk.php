@@ -61,11 +61,12 @@ homeobject.kqdk_init=function(){
 	}
 	function adddakas(o){
 		o.disabled = true;o.value='打卡中...';
-		js.cliendsend('getipmac',{},function(ret){
-			adddaka(o,{ip:ret.ip,mac:ret.mac});
-		},function(){
-			adddaka(o,{});
-			return true;
+		js.cliendsend2026('getipmac',{},function(ret){
+			if(ret.success){
+				adddaka(o,{ip:ret.data.ip,mac:ret.data.mac});
+			}else{
+				adddaka(o,{});
+			}
 		});
 	}
 }

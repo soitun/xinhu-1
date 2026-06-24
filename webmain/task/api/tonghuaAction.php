@@ -37,11 +37,19 @@ class tonghuaClassAction extends apiAction
 
 		
 		if(!$gbarr['success'])return $gbarr;
-		$ondats = json_decode(arrvalue($gbarr,'data'), true);
 		$online = false;
-		if($ondats){
-			if($ondats['pc']==$id)$online = true;
-			if($ondats['app']==$id)$online = true;
+		
+		$sdata  = arrvalue($gbarr,'data');
+		if($sdata){
+			if(c('check')->isjson($sdata)){
+				$ondats = json_decode($sdata, true);
+				if($ondats && isset($ondats['pc'])){
+					if($ondats['pc']==$id)$online = true;
+					if($ondats['app']==$id)$online = true;
+				}
+			}else{
+				if(contain(','.$sdata.',',','.$id.','))$online = true;
+			}
 		}
 		
 		if(!$online){

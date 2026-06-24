@@ -17,6 +17,8 @@ class rocksaveClassModel extends Model
 		$this->now_name 		= $name;
 		$this->rock->adminid  	= $this->now_uid;
 		$this->rock->adminname  = $this->now_name;
+		$this->adminname  		= $this->now_name;
+		$this->adminid  		= $this->now_uid;
 		return $this;
 	}
 
@@ -24,7 +26,7 @@ class rocksaveClassModel extends Model
 	/**
 	*	提交保存，简单的保存
 	*/
-	public function submit($num,$mid=0,$openlx=0)
+	public function submit($num,$mid=0, $openlx=0)
 	{
 		$this->flow 			= m('flow')->initflow($num);
 		$this->flow->adminname  = $this->now_name;
@@ -93,9 +95,22 @@ class rocksaveClassModel extends Model
 		
 		$this->flow->loaddata($mid, false);
 		$this->flow->submit('提交');
+		
+		
 		//print_r($uaarr);
 		
-		return returnsuccess();
+		return returnsuccess(array(
+			'mid' 	=> $mid,
+			'table' => $table
+		));
+	}
+	
+	public function saveUdept($table, $mid, $name, $dept)
+	{
+		m('flowbill')->update(array(
+			'uname' => $name,
+			'udeptname' => $dept,
+		), "`table`='$table' and `mid`=".$mid."");
 	}
 	
 	
@@ -128,5 +143,47 @@ class rocksaveClassModel extends Model
 		$arr 	= c('down')->uploadback($upses);
 		$arr['autoup'] = (getconfig('qcloudCos_autoup') || getconfig('alioss_autoup')) ? 1 : 0; //是否上传其他平台
 		return $arr;
+	}
+	
+	/**
+	*	文件预览下载用
+	*/
+	public function fileinfo($fileid, $type, $ismobile=0, $omode=0)
+	{
+		$fobj 	= m('file');
+		$frs 	= $fobj->getone($fileid);
+		if(!$frs)return returnerror('文件不存在了');
+		
+		$fileext		= $frs['fileext'];
+		$filename		= $frs['filename'];
+		$filepath		= $frs['filepath'];
+		$filepathout	= arrvalue($frs, 'filepathout');
+		
+		$url 			= '';
+		$data['fileext']  = $fileext;
+		$data['filename'] = $filename;
+		
+		//预览
+		if($type==0){
+			if(!$fobj->isview($fileext))
+				return returnerror('此'.$fileext.'类型文件不支持在线预览');
+		}
+		
+		if(substr($filepath,0,4)!='http' && isempt($filepathout) && !file_exists($filepath))return returnerror('文件不存在了1');
+		
+		if(c('upfile')->isimg($fileext)){
+			$url = m('admin')->getface($filepath);
+			if(!isempt($filepathout))$url = $filepathout;
+		}
+		if($url==''){
+			$url = 'index.php?m=public&a=fileviewer&id='.$fileid.'&omode='.$omode.'';
+		}
+		
+		$data['url']	  = $url;
+		$data['type']	  = $type;
+		$data['id']	  	  = $fileid;
+		$data['isview']	  = $fobj->isview($fileext); //是否可直接预览
+
+		return returnsuccess($data);
 	}
 }

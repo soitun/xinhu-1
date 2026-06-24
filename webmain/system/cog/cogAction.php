@@ -96,6 +96,8 @@ class cogClassAction extends Action
 		if(getconfig('systype')=='demo'){
 			$arr['xinhukey']='';
 			$arr['officebj_key']='';
+			$arr['openkey']='';
+			$arr['asynkey']='';
 		}
 		if(!isempt($arr['xinhukey']))$arr['xinhukey'] = substr($arr['xinhukey'],0,5).'*****'.substr($arr['xinhukey'],-5);
 		
@@ -244,6 +246,7 @@ return array(
 	{
 		$key = $this->post('key');
 		$s   = '';
+		m('log')->readPHPerr();
 		if($key != ''){
 			$s = "and (`type`='$key' or `optname` like '$key%' or `remark` like '$key%' or `web`='$key' or `ip`='$key')";
 		}
@@ -368,7 +371,7 @@ return array(
 		if(getconfig('systype')=='demo')return '演示不要改';
 		$stype = (int)$this->post('stype','0');
 		$msg  = 'ok';
-		if($stype==0)$msg = $this->saveconfig('title,imgcompress,watertype,video_bool,flowchehuitime,saasmode,hoemtimeout,usercache,xiangrecord,beianhao,locallang,savefiletype',',video_bool,');
+		if($stype==0)$msg = $this->saveconfig('title,imgcompress,watertype,video_bool,flowchehuitime,saasmode,hoemtimeout,usercache,xiangrecord,beianhao,locallang,savefiletype,tdtmapkey',',video_bool,');
 	
 		return $msg;
 	}
@@ -482,5 +485,65 @@ return array(
 		
 		
 		return '保存成功';
+	}
+	
+	/**
+	*	2026-05-10安全设置的
+	*/
+	public function safegetAjax()
+	{
+		$iplist = ''.ROOT_PATH.'/config/iplist.php';
+		$iparr 	= array();
+		if(file_exists($iplist)){
+			$iparr 	= require($iplist);
+		}
+		
+		$db = m('menu');
+		if($db->rows("`num`='safeset'")==0)$db->insert(array(
+			'name' => '安全设置',
+			'pid' 	=> '46',
+			'sort' 	=> '8',
+			'url'	=> 'system,cog,safeset',
+			'icons' => 'shield',
+			'optdt' => $this->now,
+			'num' 	=> 'safeset',
+			'ispir' => '1',
+			'type'	=> '1'
+		));
+		
+		return $iparr;
+	}
+	public function safesaveAjax()
+	{
+		if(getconfig('systype')=='demo')exit('演示上禁止设置');
+		$iplist  = ''.ROOT_PATH.'/config/iplist.php';
+		$blackip = str_replace(':','.', $this->post('blackip'));
+		$whiteip = str_replace(':','.', $this->post('whiteip'));
+		$whitecity  = $this->rock->xssrepstr($this->post('whitecity'));
+		$gaptime 	= (int)$this->post('gaptime','0');
+		$gapnums 	= (int)$this->post('gapnums','0');
+		if($zf = c('check')->onlynoen(str_replace(array('.',',','*'),'', $blackip)))return '无效字符：'.$zf.'';
+		if($zf = c('check')->onlynoen(str_replace(array('.',',','*'),'', $whiteip)))return '无效字符：'.$zf.'';
+$str = "<?php
+return array(
+
+	//黑名单IP，多个,分开如：127.0.0.1,192.168.1.100，也可以写192.168.1这样就是限制192.168.1.*所有的
+	'blackip' 	=> '$blackip',
+	
+	//白名单
+	'whiteip'	=> '$whiteip',
+	
+	//可访问的区域
+	'whitecity'	=> '$whitecity',
+	
+	//几秒内
+	'gaptime'	=> $gaptime,
+	
+	//限制访问次数
+	'gapnums'	=> $gapnums
+);";	
+		$bool = @file_put_contents($iplist, $str);
+		if(!$bool)return '保存失败无法写入：config/iplist.php';
+		return 'ok';
 	}
 }

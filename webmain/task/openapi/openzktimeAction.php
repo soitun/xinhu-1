@@ -34,6 +34,16 @@ class openzktimeClassAction extends openapiAction
 	}
 	
 	/**
+	*	获取列表
+	*/
+	public function listAction()
+	{
+		$rows = m('kqjsn')->getall('status=1 and `pinpai`=1','`num`,`name`,`snip`,`snport`','`sort` asc');
+		if(!$rows)return '';
+		return $rows;
+	}
+	
+	/**
 	*	考勤机定时请求命令
 	*/
 	public function getAction()

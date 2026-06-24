@@ -9,6 +9,7 @@ class hrClassAction extends runtAction
 		m('hr')->hrrun(); //人事每天调动/离职等运行
 	
 		//员工合同到期提醒
+		/*
 		$flow 	= m('flow')->initflow('userract');
 		$flow->updatestate();
 		$dtobj  = c('date');
@@ -30,6 +31,7 @@ class hrClassAction extends runtAction
 				'cont' 		=> $str,
 			);
 		}
+		*/
 		
 		//生日提醒
 		m('flow')->initflow('userinfo')->birthdaytodo();

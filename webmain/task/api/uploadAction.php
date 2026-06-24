@@ -188,9 +188,10 @@ class uploadClassAction extends apiAction
 	*/
 	public function initfileAction()
 	{
-		$filesize	= c('check')->onlynumber($this->post('filesize'));
-		$fileext	= $this->post('fileext');
-		$filename	= $this->getvals('filename');
+		$cobj 		= c('check');
+		$filesize	= $cobj->onlynumber($this->post('filesize'));
+		$fileext	= $cobj->repotr($this->post('fileext'));
+		$filename	= $cobj->repotr($this->getvals('filename'));
 		$where 		= "`fileext`='$fileext' and `filesize`='$filesize'";
 		if(!isempt($filename))$where.=" and `filename`='$filename'";
 		$frs 		= m('file')->getone($where,'*','`id` desc');
@@ -391,8 +392,9 @@ class uploadClassAction extends apiAction
 			}
 			//下载
 			if($type==1){
-				$url 		 = 'api.php?m=upload&id='.$fileid.'&a=down';
-				if($this->rock->web=='wxbro')$url.= '&adminid='.$this->adminid.'&token='.$this->admintoken.'';
+				$url = 'api.php?m=upload&id='.$fileid.'&a=down';
+				$url.= '&adminid='.$this->adminid.'&token='.$this->admintoken.'';
+				$url.= '&filename='.$this->jm->base64encode($frs['filename']).''; 
 				$data['url'] = $url;
 			}
 			

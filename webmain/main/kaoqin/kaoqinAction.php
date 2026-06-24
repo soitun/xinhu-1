@@ -631,6 +631,9 @@ class kaoqinClassAction extends Action
 		$uarr['location_x'] = $this->post('x');
 		$uarr['location_y'] = $this->post('y');
 		$uarr['scale'] 		= $this->post('zoom');
+		$uarr['xytype'] 	= 1;
+		$allfields = $this->db->getallfields('[Q]kqdw');
+		if(!in_array('xytype', $allfields))$this->db->query("ALTER TABLE `[Q]kqdw` ADD `xytype` tinyint(4) DEFAULT '0' COMMENT '坐标类型'");
 		m('kqdw')->update($uarr, $id);
 	}
 	
@@ -655,12 +658,15 @@ class kaoqinClassAction extends Action
 			$info = $this->get('info');
 			if(!$info)exit('not found info');
 			$arr = explode(',', $this->jm->base64decode($info));
-			$rs['precision'] = 0;
-			$rs['location_x'] = $arr[0];
-			$rs['location_y'] = $arr[1];
-			$rs['scale'] = $arr[2];
-			$rs['type'] = 1;
-			$rs['content'] = arrvalue($arr,3);
+			$scalea = explode('|', $arr[2]);
+			
+			$rs['precision'] 	= 0;
+			$rs['location_x'] 	= $arr[0];
+			$rs['location_y'] 	= $arr[1];
+			$rs['scale'] 		= $scalea[0];
+			$rs['xytype'] 		= arrvalue($scalea,1);
+			$rs['type'] 		= 1;
+			$rs['content'] 		= arrvalue($arr,3);
 		}
 		if($this->rock->ismobile())$rs['type'] = 1;
 		$this->smartydata['rs'] = $rs;
@@ -688,6 +694,12 @@ class kaoqinClassAction extends Action
 		$this->showreturn('');
 	}
 	
+	public function locationipAction()
+	{
+		$ip = $this->rock->ip;
+		if(c('check')->isneiurl('http://'.$ip.''))$ip = 'nei';
+		return c('tianditu')->ipinfo($ip);
+	}
 	
 	
 	

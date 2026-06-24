@@ -182,6 +182,10 @@ $(document).ready(function(){
 			<span style="color:#aaaaaa;">因为一些特殊文件类型是可执行的如.php.exe.sh，不直接保存</span></td></tr>
 			<tr><td height="10"></td></tr>
 			
+			<tr><td align="right" style="color:gray">天地图Key：</td><td><input name="tdtmapkey" type="text" value="<?=getconfig('tdtmapkey')?>" style="width:200px" placeholder="可选设置" class="form-control">
+			<span style="color:#aaaaaa;">系统使用<a target="_blank" href="https://www.tianditu.gov.cn/">国家天地图的API</a>，其他地图都是需要授权，看<a target="_blank" href="<?=URLY?>view_tianditu.html">帮助</a>获取</span></td></tr>
+			<tr><td height="10"></td></tr>
+			
 			<tr><td align="right" style="color:gray">系统语言：</td><td><select style="width:200px" name="locallang" class="form-control">
 			<?php 
 			$arrd = c('lang')->getLocal();

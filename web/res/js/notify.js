@@ -22,7 +22,7 @@ function notifyClass(opts){
 	this.sounderr= '';
 	this.soundbo = true;
 	this.showbool= false;
-	this.macos	 = false;
+	this.clientbo= false;
 	this._init=function(){
 		if(opts)for(var o1 in opts)this[o1]=opts[o1];
 		var strsr = '';
@@ -34,7 +34,7 @@ function notifyClass(opts){
 		}
 		if(this.sound)$('body').append(strsr);
 		var llq = navigator.userAgent.toLowerCase();
-		if(llq.indexOf('reimclient')>0)this.macos = true;
+		if(llq.indexOf('reimclient')>0)this.clientbo = true;
 	};
 	this.setsound	= function(bo){
 		this.soundbo=bo;
@@ -93,12 +93,14 @@ function notifyClass(opts){
 					me.notification=false;
 				});
 			});
-		}else if(this.macos){
+		}else if(this.clientbo){
 			rockclient.rockFun("Notification",{
 				title:can.title,
-				msg:can.body
+				msg:can.body,
+				icon:can.icon
 			}, function(ret){
-				
+				var salx=clsfun(can);
+				if(!salx)nwjs.winshow();
 			});
 		}else{
 			var notification= new Notification(title, can);
@@ -200,7 +202,7 @@ function notifyClass(opts){
 		var s = '<div id="'+id+'" temp="notifyshow" class="box" style="position:absolute;z-index:70;right:'+wz[0]+';top:'+wz[1]+';border:1px '+cos[2]+' solid; background:'+cos[1]+';color:'+cos[0]+';border-radius:5px">';
 		if(can.closetime==0)s+='<div onclick="$(this).parent().fadeOut(function(){$(this).remove()})" style="position:absolute;right:3px;top:0px;cursor:pointer">×</div>';
 		s+='<table style="margin:15px"><tr valign="top">';
-		s+='	<td width="53px" align="left"><img style="width:40px;height:40px" src="'+can.icon+'"></td>';
+		s+='	<td width="53px" align="left"><img style="width:40px;height:40px;border-radius:5px" src="'+can.icon+'"></td>';
 		s+='	<td id="'+id+'_td" align="left"><div style="padding-bottom:3px;font-size:14px"><b>'+can.title+'</b></div><div>'+mess+'</div></td>';
 		s+='</tr></table>';
 		s+='</div>';

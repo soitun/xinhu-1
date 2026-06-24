@@ -7,7 +7,7 @@
 <link rel="shortcut icon" href="favicon.ico" />
 <script type="text/javascript" src="js/jquery.js"></script>
 <script type="text/javascript" src="js/js.js"></script>
-<script type="text/javascript" src="<?php echo P;?>/install/installscript.js"></script>
+<script type="text/javascript" src="<?php echo P;?>/install/installscript.js?<?=time()?>"></script>
 <style>
 .input{width:210px;height:30px;line-height:20px}
 </style>
@@ -90,7 +90,7 @@
 				<tr><td height="8"></td></tr>
 				<tr>
 					<td align="right"><font color=red>*</font>表名前缀：</td>
-					<td><input class="input" name="perfix" value="xinhu_"></td>
+					<td><input class="input" name="perfix" value="xinhu_">&nbsp;<a onclick="changeper()" href="javascript:;" class="blue">随机生成</a></td>
 				</tr>
 				
 				

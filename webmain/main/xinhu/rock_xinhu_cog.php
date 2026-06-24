@@ -45,7 +45,7 @@ $(document).ready(function(){
 		},
 		kuanshu1:function(){
 			c.chengeread(true);
-			js.prompt('快速设置','请输入您服务器真实IP(本地测试用127.0.0.1)',function(jg,tet){
+			js.prompt('快速设置','请输入您服务器真实IP(本地测试用127.0.0.1)<br><label><input type="checkbox" id="isjavaver">服务端是java版</label>',function(jg,tet){
 				if(jg=='yes' && tet)c.kusnsegeo(tet);
 			});
 		},
@@ -56,8 +56,14 @@ $(document).ready(function(){
 				js.msg('msg','服务器真实IP格式不正确');
 				return;
 			}
-			get('push_{rand}').value='http://127.0.0.1:6553/';
-			get('host_{rand}').value='ws://'+ips+':6552/';
+			if(get('isjavaver').checked){
+				get('push_{rand}').value='http://127.0.0.1:6556/reim/push';
+				get('host_{rand}').value='ws://'+ips+':6556/websocket';
+			}else{
+				get('push_{rand}').value='http://127.0.0.1:6553/';
+				get('host_{rand}').value='ws://'+ips+':6552/';
+			}
+			
 			get('receid_{rand}').value='rockxinhu';
 			js.msg('success','设置完成，请点保存，并测试验证一下地址');
 		},
@@ -174,7 +180,7 @@ $(document).ready(function(){
 		
 		<tr>
 			<td  align="right">服务端版本：</td>
-			<td class="tdinput"><select id="servertype_{rand}" style="width:300px" class="form-control"><option value="1">nodejs版(推荐)</option><option value="0">PHP版(最新版弃用)</option></select></td>
+			<td class="tdinput"><select id="servertype_{rand}" style="width:300px" class="form-control"><option value="1">nodejs(推荐)/java版</option><option value="0">PHP版(最新版弃用)</option></select></td>
 		</tr>
 		
 		<tr>

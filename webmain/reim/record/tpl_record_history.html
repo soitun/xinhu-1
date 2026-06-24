@@ -36,9 +36,17 @@ echo 'body{.qipao .qipaocontright{background:rgba('.$cols.',0.4)}.qipao .qipaori
 echo c('color')->getApptheme();
 ?>
 <script>
-adminname='',adminface='',video_bool=false,companynum='';
+adminname='',adminface='',video_bool=false,companynum='',firstbool=false;
 date = js.now('Y-m-d');
+
+function reimReady(){
+	initbody();
+}
+
 function initbody(){
+	if(clientbool && typeof(rockclient)=='undefined')return;
+	if(firstbool)return;
+	firstbool = true;
 	reim.outgroup.outunum = js.getoption('outunum');
 	c.init();
 }
@@ -52,6 +60,7 @@ var c = {
 		try{reim.onlinearr 	= opener.reim.onlinearr;}catch(e){}
 		$('#historylist').perfectScrollbar();
 		reshow(type,gid);
+		reim.addEventListener();
 	},
 	getsese:function(){
 		var he = winHb();

@@ -4,6 +4,7 @@ $(document).ready(function(){
 	var a = $('#view_{rand}').bootstable({
 		tablename:'userinfo',celleditor:true,fanye:true,
 		url:js.getajaxurl('publicstore','userinfo','main'),storeafteraction:'userinfoafter',storebeforeaction:'userinfobefore',
+		fieldsafteraction:'userinfoaftercell',modedir:'userinfo:main',
 		columns:[{
 			text:'部门',dataIndex:'deptname',align:'left',sortable:true
 		},{

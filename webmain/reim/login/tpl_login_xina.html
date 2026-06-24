@@ -4,7 +4,7 @@
 <title><?=$da['title']?></title>
 <meta name="description" content="">
 <meta name="keywords" content="">
-<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
 <meta name="format-detection" content="telephone=no"/>
 <meta name="format-detection" content="email=no"/>
@@ -14,7 +14,7 @@
 <script type="text/javascript" src="js/jquery.js"></script>
 <script type="text/javascript" src="js/js.js"></script>
 <script type="text/javascript" src="js/base64-min.js"></script>
-<script type="text/javascript" src="web/res/js/nwjs.js"></script>
+<script type="text/javascript" src="web/res/js/nwjs.js?<?=time()?>"></script>
 <style>
 .lmaisft{text-align:center;-webkit-app-region:no-drag;}
 .close{height:20px;width:20px;display:block;text-align:center;line-height:18px;cursor:pointer;font-size:16px}
@@ -26,10 +26,11 @@ echo c('color')->getApptheme();
 ?>
 <script>
 CFROM = 'reim';
-var temp_token='';
-var logifouct=false;
+var temp_token='',logifouct=false, firstbool = false;
 function initbody(){
-	
+	if(clientbool && typeof(rockclient)=='undefined')return;
+	if(firstbool)return;
+	firstbool = true;
 	nwjs.init();
 	resize();
 	$(window).resize(resize);
@@ -44,8 +45,8 @@ function initbody(){
 	}
 	if(form('adminmobile'))form('adminmobile').value=js.getoption('adminmobile');
 	
-	if(nwjsgui){
-		$('#footerts').append('<a style="font-size:12px" onclick="return clearchater()" href="javascript:;">清缓存</a>');
+	if(nwjsgui || clientbool){
+		$('#footerts').append('<a style="font-size:12px" class="zhu" onclick="return clearchater()">清缓存换地址</a>');
 	}
 	//禁止后退
 	try{
@@ -54,11 +55,14 @@ function initbody(){
 			history.pushState(null, null, document.URL);
 		});
 	}catch(e){}
-	if(winWb()>400)rewinheight(400,380);
-	if(jisxobo()){
-		
-	}
+	if(winWb()>500)rewinheight(450,380);
+	nwjs.removetray();
 }
+
+function reimReady(){
+	initbody();
+}
+
 
 //是不是xp和win7的版本
 function jisxobo(){
@@ -72,16 +76,25 @@ function jisxobo(){
 
 
 function clearchater(){
-	nwjsgui.App.clearCache();
 	localStorage.clear();
+	if(clientbool){
+		js.confirm('清除成功，请重新打开', function(){
+			rockclient.rockFun('clearCache', {atype:'restart'});
+		});
+		return;
+	}
+	nwjsgui.App.clearCache();
 	var na = nwjsgui.App.manifest.name;
-	js.confirm('基本缓存已删除，更多缓存删除，是否打开对应['+na+']目录？需手动全部删除目录。',function(jg){
-		if(jg=='yes'){
-			var naea = nwjsgui.App.dataPath;
-			var oru= naea.split(na)[0]+na;
-			nwjsgui.Shell.openItem(oru);
-			nwjsgui.App.quit();
+	var naea = nwjsgui.App.dataPath;
+	var oru= naea.split(na)[0]+na;
+	var ostype = require('os').platform();
+	js.confirm('<div class="wrap">基本缓存已全部删除，将删除缓存文件夹“'+oru+'”，将重新打开</div>',function(jg){
+		js.loading('处理中...');
+		if(ostype.indexOf('win')==0){
+			nwjs.writeFile('clear.bat', '@echo off\necho clearing\nTIMEOUT /t 2 /nobreak\nrd /s /q "'+oru+'"\nTIMEOUT /t 1 /nobreak\nstart "" "'+nwjs.getpath()+'/reim.exe"');
+			nwjsgui.Shell.openItem(''+nwjs.getpath()+'/clear.bat');
 		}
+		nwjsgui.App.quit();
 	});
 }
 
@@ -98,16 +111,11 @@ function autologin(ms){
 	}
 }
 
-function bodyunload(){
-	nwjs.removetray();
-}
+
 function resize(){
-	var tt=$(window).height()-$('.lmaisft').height();
-	var ts=(tt*0.5)-20;
-	if(ts<10)ts=10;
-	var lx1 = 0;
-	if(jisxobo())lx1=10;
-	$('#mindivshow').css('height',''+(winHb()-42+lx1)+'px');
+	var hei = (winHb()-$('#mindivshows').height()-180)*0.5;
+	if(hei<0)hei=1;
+	$('#blankdiv').height(hei);
 }
 
 
@@ -164,9 +172,8 @@ function loginsubmit(lx){
 			get('myface').src=a.face;
 			btnobj.value='登录成功';
 			js.setoption('loginface', a.face);
-			var curl = '?d=reim&a=xina';
+			js.setoption('admintoken', a.token);
 			loginsuccess(a);
-			js.location(curl);
 		}else{
 			btnobj.value='登录';
 			js.msg('msg',a.msg);
@@ -185,10 +192,9 @@ function loginsubmit(lx){
 }
 function loginsuccess(a){
 	$('#mindivshows').hide();
-	js.setoption('admintoken', a.token);
-	if(nwjsgui){
-		rewinheight(600, 900);
-	}
+	rewinheight(600, 900, function(){
+		js.location('?d=reim&a=xina');
+	});
 }
 
 function getpassobj(){
@@ -199,16 +205,24 @@ function changeauto(o){
 	if(o.checked)oi='1';
 	js.setoption('autologin', oi);
 }
-function winclose(){
-	nwjs.closebool=true;
-	nwjs.win.close();
-}
 
-function rewinheight(hei, wid){
+
+function rewinheight(hei, wid, call){
 	var l = (screen.width-wid)*0.5;
 	var t = (screen.height-hei)*0.5-20;
-	nwjs.win.moveTo(parseInt(l),parseInt(t));
-	nwjs.win.resizeTo(wid,hei);
+	if(nwjsgui){
+		nwjs.win.moveTo(parseInt(l),parseInt(t));
+		nwjs.win.resizeTo(wid,hei);
+		if(call)call();
+	}else if(clientbool){
+		rockclient.rockFun('resize',{
+			width:wid,
+			height:hei,
+			align:'center'
+		}, call);
+	}else{
+		if(call)call();
+	}
 }
 
 function getcodes(o1){
@@ -267,13 +281,14 @@ function changlogin(){
 }
 </script>
 </head>
-<body style="overflow:hidden">
+<body style="overflow:hidden;">
 
 <div >
 
 <div style="height:30px;overflow:hidden;-webkit-app-region:drag;margin-right:30px;user-select:none;">&nbsp;</div>
 
-<div align="center" id="mindivshow" style="height:348px;overflow:hidden;">
+<div align="center" id="mindivshow">
+	<div id="blankdiv"></div>
 	<div id="mindivshows">
 	<div class="lmaisft">
 		<div id="topblank" style="height:5px;overflow:hidden"></div>
@@ -330,5 +345,7 @@ function changlogin(){
 
 
 </div>
+
+<script type="text/javascript" src="mode/plugin/jquery-rockmodels.js"></script>
 </body>
 </html>

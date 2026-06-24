@@ -177,4 +177,24 @@ class checkChajian extends Chajian{
 		return $str;
 	}
 	
+	/**
+	*	去掉'和"空格
+	*/
+	public function repotr($str)
+	{
+		if(isempt($str))return $str;
+		return str_replace(array('"',"'",' ',"\n"),'', $str);
+	}
+	
+	/**
+	*	是不是json
+	*/
+	public function isjson($str)
+	{
+		if(!$str)return false;
+		if(
+			(substr($str,0,1)=='{' && substr($str,-1)=='}') ||
+			(substr($str,0,1)=='[' && substr($str,-1)==']')
+		)return true;
+	}
 }

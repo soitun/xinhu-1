@@ -4,6 +4,7 @@ class kqjcmdClassModel extends Model
 {
 	private $snrs;
 	private $pinpai = 0;
+	public $snobj,$kquobj;
 	
 	public function initModel()
 	{
@@ -199,8 +200,8 @@ class kqjcmdClassModel extends Model
 	*/
 	public function getcmd($snid)
 	{
-		//10分钟内的
-		$optdt= date('Y-m-d H:i:s', time()-10*60);
+		//60分钟内的
+		$optdt= date('Y-m-d H:i:s', time()-60*60);
 		$rows = $this->getall("`snid`='$snid' and `status`=0 and `optdt`>'$optdt'",'*','optdt asc');
 		$snrs = $this->getsninfo($snid);
 		if($rows){
@@ -410,6 +411,12 @@ class kqjcmdClassModel extends Model
 	{
 		$dkdt 	= $rs['time'];
 		$uid 	= $rs['ccid']; //用户ID
+		
+		if(isset($rs['uid'])){
+			$uid = $rs['uid'];
+			$this->uinfoarr[$uid] = $uid;
+		}
+			
 		//是中控考勤机来的
 		if($iszk==1){
 			if(isset($this->uinfoarr[$uid])){

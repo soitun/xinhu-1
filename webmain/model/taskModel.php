@@ -1,6 +1,7 @@
 <?php
 class taskClassModel extends Model
 {
+	private $reimtype;
 	/**
 	*	读取计划任务运行列表
 	*/

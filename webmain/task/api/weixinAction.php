@@ -33,6 +33,7 @@ class weixinClassAction extends apiAction{
 	{
 		$fileid 			= (int)$this->post('fileid','0');
 		$ispz 				= (int)$this->post('ispz','0');
+		$xytype 			= (int)$this->post('xytype','0');
 		$imgpath			= m('file')->getmou('filepath', $fileid);
 		$now 				= $this->rock->now;
 		$uid				= $this->adminid;
@@ -50,8 +51,16 @@ class weixinClassAction extends apiAction{
 		$arr['uid']			= $uid;
 		$arr['comid']		= $comid;
 		$arr['imgpath']		= $imgpath;
+		$arr['xytype']		= $xytype;
+		
+		$allfields = $this->db->getallfields('[Q]location');
+		if(!in_array('xytype', $allfields))$this->db->query("ALTER TABLE `[Q]location` ADD `xytype` tinyint(4) DEFAULT '0' COMMENT '坐标类型'");
 		m('location')->insert($arr);
+		
 		if($type==1){
+			$allfields = $this->db->getallfields('[Q]kqdkjl');
+			if(!in_array('xytype', $allfields))$this->db->query("ALTER TABLE `[Q]kqdkjl` ADD `xytype` tinyint(4) DEFAULT '0' COMMENT '坐标类型'");
+			
 			$dkdt 	= $now;
 			$ip		= $this->rock->ip;
 			$this->db->record('[Q]kqdkjl',array(
@@ -61,6 +70,7 @@ class weixinClassAction extends apiAction{
 				'imgpath'	=> $imgpath,
 				'address'	=> $arr['label'],
 				'comid'		=> $comid,
+				'xytype'	=> $xytype,
 				'lat'=> $arr['location_x'],
 				'lng'=> $arr['location_y'],
 				'accuracy'=> $arr['precision'],

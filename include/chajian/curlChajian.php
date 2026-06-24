@@ -89,7 +89,7 @@ class curlChajian extends Chajian{
 		curl_setopt($ch, CURLOPT_TIMEOUT, $this->TIMEOUT); 
 		$output = curl_exec($ch);
 		$this->setResponseHeaders($ch);
-		curl_close($ch);
+		@curl_close($ch);
 		return $output;
 	}
 	
@@ -125,7 +125,7 @@ class curlChajian extends Chajian{
 		$output = curl_exec($ch);
 		$curl_errno = curl_errno($ch);
 		$this->setResponseHeaders($ch);
-		curl_close($ch);
+		@curl_close($ch);
 		return $output;
 	}
 	

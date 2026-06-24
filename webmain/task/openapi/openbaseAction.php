@@ -16,6 +16,8 @@ class openbaseClassAction extends openapiAction
 		if(!$arr)return returnerror('not data');
 		
 		$modenum = $this->rock->xssrepstr($arr['basemodenum']);
+		if(c('check')->onlynoen($modenum))$modenum = '';
+		
 		$adminid = $this->rock->xssrepstr($arr['baseoptid']); 	//提交的用户
 		if(isempt($modenum))return returnerror('modenum is empty');
 		$uid 	 = $this->getuserid($adminid);
@@ -57,7 +59,23 @@ class openbaseClassAction extends openapiAction
 	}
 	
 	/**
-	*	例子3：向单用户/会话发消息，聊天的。
+	*	往日志写消息
 	*/
+	public function addlogAction()
+	{
+		$type 	= $this->jm->base64decode($this->get('type'));
+		$remark = $this->jm->base64decode($this->get('remark'));
+		$level 	= (int)$this->get('level','2');
+		$arr = array(
+			'type' => $this->rock->xssrepstr($type),
+			'remark' => $this->rock->xssrepstr($remark),
+			'optname' => '系统',
+			'optdt' => $this->rock->now,
+			'ip' => $this->rock->ip,
+			'level' => $level,
+		);
+		m('log')->insert($arr);
+		return 'ok';
+	}
 	
 }

@@ -87,3 +87,8 @@ function getxhkey(o1){
 		});
 	});
 }
+
+
+function changeper(){
+	form('perfix').value='oa'+parseInt(Math.random()*9999)+'_';
+}

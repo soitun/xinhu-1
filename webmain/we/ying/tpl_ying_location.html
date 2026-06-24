@@ -12,8 +12,8 @@
 <script type="text/javascript" src="js/jswx.js"></script>
 <script type="text/javascript" src="js/base64-min.js"></script>
 <script type="text/javascript" src="web/res/js/jquery-rockupload.js"></script>
-<script charset="utf-8" src="https://map.qq.com/api/js?v=2.exp&key=<?=$da['qqmapkey']?>"></script>
-<script charset="utf-8" src="https://map.qq.com/api/gljs?v=1.exp&key=<?=$da['qqmapkey']?>&libraries=geometry"></script>
+<script src="https://api.tianditu.gov.cn/api?v=4.0&tk=<?=c('tianditu')->getKey()?>"></script>
+<script src="js/jsmap.js"></script>
 <script type="text/javascript" src="js/dingwei.js?<?=time()?>"></script>
 <style>
 <?php
@@ -31,7 +31,7 @@ if(method_exists($colobj,'colorTorgb')){
 var kqrs = <?=json_encode($kqrs);?>,kqors = <?=json_encode($kqors);?>,kqallrs=[],isgzh = <?=$isgzh?>;
 js.servernow = '<?=$rock->now?>',openfrom='<?=$openfrom?>';
 var infoWin,marker,circle;
-var label='',accuracy=0,latitude='',longitude='',kqjuli=-1,addbo = true;
+var label='',accuracy=0,latitude='',longitude='',kqjuli=-1,addbo = true,xytype=0;
 
 function initbody(){
 	initbodyss();
@@ -47,31 +47,34 @@ function initbodyss(){
 	var lata = js.getoption('latlongedu','24.504332,118.141136,12').split(',');
 	if(!lata[2])lata[2]=12;
 	scale 	= parseFloat(lata[2]);
-	var center = new qq.maps.LatLng(parseFloat(lata[0]), parseFloat(lata[1]));
-	map = new qq.maps.Map(document.getElementById('container'),{
-        center: center,
-        zoom: scale
-    });
+	
+	var center = new T.LngLat(parseFloat(lata[1]), parseFloat(lata[0]));
+	map = new T.Map('container');
+	map.centerAndZoom(center, scale);
+	map.addControl(new T.Control.Zoom());
 	
 	if(kqrs){
 		kqallrs.push(kqrs);
-		var i,kqrsa,enddt,precision;
+		var i,kqrsa,enddt,precision,x,y;
 		for(i in kqors)kqallrs.push(kqors[i]);
 		
 		for(i=0;i<kqallrs.length;i++){
 			kqrsa = kqallrs[i];
-			enddt = new qq.maps.LatLng(parseFloat(kqrsa.location_x), parseFloat(kqrsa.location_y));
-			new qq.maps.Marker({map: map,position:enddt});
+			if(!kqrsa.location_x || !kqrsa.location_y)continue;
+			x = parseFloat(kqrsa.location_x);
+			y = parseFloat(kqrsa.location_y);
+			
+			if(kqrsa.xytype != '1'){
+				var wgs = gcj02ToWgs84(y, x);
+				y = wgs.lon;
+				x = wgs.lat;
+			}
+			enddt = new T.LngLat(y, x);
+			map.addOverLay(new T.Marker(enddt));
 			precision = parseFloat(kqrsa.precision);
 			if(precision>0){
-				new qq.maps.Circle({
-					map:map,
-					center:enddt,
-					radius:precision,
-					fillColor:new qq.maps.Color(255,0,0, 0.3),
-					strokeColor:new qq.maps.Color(255,0,0, 0.5),
-					strokeWeight:1
-				});
+				var circle = new T.Circle(enddt, precision,{color:"red",weight:1,opacity:0.5,fillColor:"#FFFFFF",fillOpacity:0.5,lineStyle:"solid"});
+				map.addOverLay(circle);
 			}
 		}
 	}
@@ -83,17 +86,24 @@ function dingweidak(){
 
 //定位成功后回调
 js.dw.ondwcall = function(res){
+	xytype		= 1;
 	latitude 	= res.latitude;
 	longitude 	= res.longitude;
 	accuracy 	= res.accuracy;
-	var center 	= new qq.maps.LatLng(latitude, longitude);
+	
+	if(res.xxtype != '1'){
+		var wgs = gcj02ToWgs84(longitude, latitude);
+		longitude = wgs.lon;
+		latitude = wgs.lat;
+	}
+	
+	var center 	= new T.LngLat(longitude, latitude);
 	addbo	 	= true;
 	scale	 	= map.getZoom();
 	js.setoption('latlongedu',''+latitude+','+longitude+','+scale+'');
-	map.setCenter(center);
+	map.panTo(center);
 	label		= res.address;
 	showinfo(center ,accuracy, '定位成功<br>地址：'+res.addressinfo+'');
-	
 	this.julisuan(latitude,longitude, kqallrs, function(narr){
 		kqallrs = narr;
 		for(var i=0;i<narr.length;i++){
@@ -114,24 +124,23 @@ function showtimessabc(){
 	setTimeout('showtimessabc()',1000);
 }
 
-function showinfo(center ,fw, str){
-	if(!infoWin)infoWin = new qq.maps.InfoWindow({
-		map: map
-	});
-	infoWin.open();
-	infoWin.setContent(str);
-	infoWin.setPosition(center);
+function showinfo(center,fw, str){
+	if(!marker){
+		marker = new T.Marker(center);
+		map.addOverLay(marker);
+		infoWin = new T.InfoWindow('<div id="showcontdiv" style="width:200px"></div>');
+	}else{
+		marker.closeInfoWindow();
+		marker.setLngLat(center);
+	}
+	marker.openInfoWindow(infoWin);
+	$('#showcontdiv').html(str);
 	
-	if(!marker)marker= new qq.maps.Marker({
-        map: map
-    });
-	marker.setPosition(center);
-	if(!circle)circle=new qq.maps.Circle({
-        map:map,
-        strokeWeight:1
-    });
-	circle.setCenter(center);
-	circle.setRadius(parseFloat(fw));
+	if(fw>0){
+		if(circle)circle.onRemove();
+		circle = new T.Circle(center, fw,{color:"blue",weight:1,opacity:0.5,fillColor:"#FFFFFF",fillOpacity:0.5,lineStyle:"solid"});
+		map.addOverLay(circle);
+	}
 }
 
 //保存
@@ -153,7 +162,7 @@ function adddkjl(lx,ss,sm, uobo){
 	scale	 = map.getZoom();
 	var ispz = (kqrs) ? kqrs.ispz : '0';
 	js.setoption('latlongedu',''+latitude+','+longitude+','+scale+'');
-	var data = {location_x:latitude,type:lx,location_y:longitude,fileid:upfileid,scale:scale,precision:accuracy,label:jm.base64encode(label),sm:jm.base64encode(sm),ispz:ispz};
+	var data = {location_x:latitude,type:lx,location_y:longitude,fileid:upfileid,scale:scale,precision:accuracy,label:jm.base64encode(label),sm:jm.base64encode(sm),ispz:ispz,xytype:xytype};
 	js.ajax('weixin','addlocation',data,function(ret){
 		js.msg('success',''+ss+'成功:'+ret.now+'');
 		$('#dwdiv').after('<div>刚'+ss+'.'+ret.now.substr(10)+'('+label+')</div>');
@@ -184,17 +193,12 @@ var dwarr = <?=json_encode($dwarr)?>;
 function showdw(id){
 	var d = dwarr[id];
 	if(isempt(d.location_x)){js.wx.alert('没有位置信息无法查看');return;}
-	if(js.jssdkstate!=1 || isempt(d.location_x)){
-		var url = '?d=main&m=kaoqin&a=location&id='+d.id+'';
-		js.location(url);
+	
+	var url = '?d=main&m=kaoqin&a=location&id='+d.id+'';
+	if(apicloud){
+		api.openWin({url:NOWURL+url});
 	}else{
-		wx.openLocation({
-			latitude: parseFloat(d.location_x), // 纬度，浮点数，范围为90 ~ -90
-			longitude: parseFloat(d.location_y), // 经度，浮点数，范围为180 ~ -180。
-			name: '定位地址', // 位置名
-			address: d.label, // 地址详情说明
-			scale: parseFloat(d.scale)
-		});
+		js.location(url);
 	}
 }
 function addkaoqin(){
@@ -320,7 +324,7 @@ function showimgs(o1){
 <div>
 	<div style="width:100%;height:300px;position:relative">
 		<div style="display:none;position:absolute;z-index:2;left:1px;top:1px;width:120px;height:80px;overflow:hidden"><img width="100%" onclick="showimgs(this)" id="paizhaoimg" src="images/noimg.jpg"></div>
-		<div id="container" style="position:absolute;width:100%;height:300px;"></div>
+		<div id="container" style="position:absolute;width:100%;height:300px;z-index:1"></div>
 		<div class="addbtnss" onclick="addkaoqin()"><div style="margin-top:20px">考勤打卡<br><span id="timess"><?=date('H:i:s')?></span></div></div>
 	</div>
 	

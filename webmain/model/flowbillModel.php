@@ -261,6 +261,14 @@ class flowbillClassModel extends Model
 		return $to;
 	}
 	
+	//申请中
+	public function applytotal($uid)
+	{
+		$where	= '(`uid`='.$uid.' or `optid`='.$uid.') and `status` not in(1,2,5) and `isturn`=1 and isdel=0';
+		$to 	= $this->rows($where);
+		return $to;
+	}
+	
 	//未通过的
 	public function applymywgt($uid)
 	{

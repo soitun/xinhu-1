@@ -70,7 +70,7 @@ $(document).ready(function(){
 		},
 		search:function(){
 			var s=get('key_{rand}').value;
-			a.setparams({key:s},true);
+			a.setparams({key:s,dt:get('dt1_{rand}').value},true);
 		}
 	};
 
@@ -86,7 +86,9 @@ $(document).ready(function(){
 <td nowrap>
 	<button class="btn btn-success" click="yidu,1"  type="button">标为已读</button> &nbsp; 
 </td>
-
+<td style="padding-right:10px">
+<input style="width:100px" placeholder="提醒日期" onclick="js.changedate(this)" readonly class="form-control datesss" id="dt1_{rand}" >
+</td>
 <td width="95%" align="left">
 	
 		<div class="input-group" style="width:220px;">

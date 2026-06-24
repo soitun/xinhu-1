@@ -55,15 +55,18 @@ class mode_userClassAction extends inputAction{
 		$rows['name'] 	= $name;
 		$rows['email'] 	= $email;
 		$notsave		= '';
+		$randslat		= md5($this->rock->jm->getRandkey().time().rand(100,99999));
 		
 		if($addbo){
 			if(isempt($pass))$pass = '123456';
-			$rows['pass'] 	= md5($pass);
+			$rows['pass'] 		= md5($pass.$randslat);
+			$rows['randslat'] 	= $randslat;
 		}else{
 			if(isempt($pass)){
 				$notsave	= 'pass';
 			}else{
-				$rows['pass'] 		= md5($pass);
+				$rows['pass'] 		= md5($pass.$randslat);
+				$rows['randslat'] 	= $randslat;
 				$rows['editpass'] 	= '0';
 			}
 		}
@@ -154,6 +157,15 @@ class mode_userClassAction extends inputAction{
 		$rows 	= $this->db->getall('select `ranking` from `[Q]admin` group by `ranking`');
 		foreach($rows as $k=>$rs)$arr[] = array('name'=>$rs['ranking'],'value'=>'');
 		return $arr;
+	}
+	
+	public function editpassAjax()
+	{
+		$id 	= (int)$this->get('id');
+		$pass 	= $this->get('pass');
+		if(!$pass)return;
+		m('login')->editpass($id, true, $this->jm->base64decode($pass));
+		return 'ok';
 	}
 }	
 			

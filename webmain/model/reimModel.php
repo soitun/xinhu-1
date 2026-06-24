@@ -1065,7 +1065,7 @@ class reimClassModel extends Model
 			}
 		}
 		$uwhere = "$where `status`=1";
-		$rows 	= m('logintoken')->getrows("`uid` in(select id from `[Q]admin` where $uwhere) and `cfrom` in ('nppandroid','nppios') and `online`=1",'*','id desc');
+		$rows 	= m('logintoken')->getrows("`uid` in(select id from `[Q]admin` where $uwhere) and `cfrom` in ('nppandroid','nppios','npphongmen') and `online`=1",'*','id desc');
 		$jpreg	= '';
 		$uida 	= $pushuids = $alias2019 = $uid2019 = $jparr =  array();
 		$uids	= '0';
@@ -1507,82 +1507,6 @@ class reimClassModel extends Model
 	}
 	
 	
-	
-	
-	//微信消息回调（弃用了）
-	public function getwxchat($arr)
-	{
-		$this->rock->debugs(json_encode($arr),'cccc');if(!isset($arr['MsgType']))return;
-		$MsgType		= $arr['MsgType'];
-		$FromUserName	= $arr['FromUserName'];
-		$user 			= $FromUserName;
-		$urs		 	= m('admin')->getone("`user`='$FromUserName'",'id,name');
-		if(!$urs)return;
-		$sendid			= $urs['id'];
-		$sendname		= $urs['name'];
-		$this->adminid	= $sendid;
-		$this->adminname= $sendname;
-		if($MsgType == 'event'){
-			$event	= $arr['Event'];
-			if($event=='create_chat')m('weixin:chat')->addchat($sendid, $sendname,$arr);
-			if($event=='update_chat')m('weixin:chat')->updatechat($arr);
-			if($event=='quit_chat')m('weixin:chat')->quitchat($arr);
-			if($event=='subscribe')m('weixin:user')->subscribe($user,1);
-			if($event=='unsubscribe')m('weixin:user')->subscribe($user,4);
-			return;
-		}
-		if(!isset($arr['Type']))return;
-		$Type			= $arr['Type'];
-		$gid 			= 0;
-		$optdt 			= date('Y-m-d H:i:s', $arr['CreateTime']);
-		$cont 			= '';
-		if($Type=='single' || $Type=='userid'){
-			$gid = (int)m('admin')->getmou('id', "`user`='".$arr['Id']."'");
-			$type= 'user';
-		}
-		if($Type=='group'){
-			$gid = m('weixin:chat')->getchatid($arr['Id'], $sendid, $sendname);
-			$type= 'group';
-		}
-		if($gid==0)return;
-		
-		@$msgid	= $arr['MsgId'];if(isempt($msgid))return;
-		if($this->rows("`msgid`='$msgid'")>0)return;
-		
-		if($MsgType=='text'){
-			$cont = $arr['Content'];
-		}
-		if($MsgType=='location'){
-			$cont = '位置：'.$arr['Label'];
-		}
-		if($MsgType=='voice'){
-			$cont = '语音,请用微信收听';
-			if(isset($arr['MediaId']))$this->asynurl('asynrun','downwxmedia', array(
-				'mediaid' 	=> $arr['MediaId'],
-				'msgid' 	=> $msgid,
-				'fileext'	=> 'amr',
-				'adminid'	=> $sendid	
-			));
-		}
-		if($MsgType=='image'){
-			$cont = '[图片]';
-			$PicUrl = $this->rock->jm->encrypt($arr['PicUrl']);
-			$this->asynurl('asynrun','downwxpic', array(
-				'picurl' 	=> $PicUrl,
-				'msgid' 	=> $msgid,
-				'adminid'	=> $sendid
-			));
-		}
-		if($MsgType=='link'){
-			if(isempt($arr['Title']))$arr['Title']='链接';
-			$cont = '[A]'.$arr['Title'].'|'.$arr['Url'].'[/A]';
-		}
-		if($cont!='')$this->sendinfor($type,$sendid, $gid, array(
-			'cont'  => $this->rock->jm->base64encode($cont),
-			'optdt' => $optdt,
-			'msgid' => $msgid
-		));
-	}
 	
 	//下载微信上图片
 	public function downwximg($url, $msgid)

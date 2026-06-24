@@ -29,6 +29,7 @@ a:link,a:visited{color:var(--main-color);TEXT-DECORATION:none;font-size:var(--fo
 a:hover{TEXT-DECORATION:underline;color:red;}
 input,button,textarea,select,div{resize:none;outline:none;font-size:var(--font-size);}
 input[type=button], input[type=submit], input[type=file], button {-webkit-appearance: none;}
+.delcolor{color:#D9534F}
 
 ::placeholder{color:#999999;}
 .wrap{word-wrap:break-word;word-break:break-all;white-space:normal;}
@@ -50,6 +51,7 @@ input[type=button], input[type=submit], input[type=file], button {-webkit-appear
 .form-control{width:98%}
 textarea.form-control{overflow:auto;padding-top:5px;padding-bottom:5px}
 .box{box-shadow:0px 0px 5px rgba(var(--rgb-r),var(--rgb-g),var(--rgb-b),0.3);}
+.boxh{box-shadow:0px 0px 5px rgba(0,0,0,0.3);}
 
 .hover:hover,.active{
 	background-color:rgba(0,0,0,0.1);
@@ -273,3 +275,16 @@ a.blue:link,a.blue:visited{color:blue;}
 .rock-header-text{text-align:center;font-size:18px;color:var(--main-color);flex:1}
 .rock-header-btn{display:block;height:50px;width:50px;text-align:center;line-height:50px;font-size:16px}
 .rock-header-btn:active{background-color:rgba(0,0,0,0.05)}
+
+.rock-tabbar{height:55px;background-color:#f8f8f8;overflow:hidden;font-size:18px;text-align:center;position:fixed;left:0px;bottom:0px;width:100%;z-index:10;border-top:0.5px var(--main-border) solid;display:flex}
+.rock-tabbar-item{flex:1;text-align:center;line-height:20px;font-size:12px;color:gray}
+.rock-tabbar-active{color:var(--main-color)}
+.rock-tabbar-icon{margin-top:10px;font-size:18px}
+
+.rock-cells-title{color:#aaaaaa;font-size:14px;margin-top: 16px;margin-bottom: 3px;padding-left: 12px;padding-right: 12px;}
+.rock-cells{background-color:white;}
+.rock-cell{padding:16px;display: flex;-webkit-box-align: center;align-items: center; border-bottom:0.5px solid rgba(0,0,0,0.05);user-select:none;}
+.rock-cells .rock-cell:first-child{border-top:0.5px solid rgba(0,0,0,0.05)}
+.rock-cells .rock-cell-active:active{background-color:rgba(0,0,0,0.05)}
+.rock-cell-bd{flex:1}
+.rock-cell-rd{color:gray;font-size:14px}

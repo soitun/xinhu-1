@@ -101,6 +101,9 @@ class homeitemsClassModel extends Model
 		if($this->iscun('wyfee')){
 			if(in_array('wyfee', $nubar))$arr['wyfee'] 		= m('wyfee')->rows('`ispay`=2');
 		}
+		if($this->iscun('finorder')){
+			if(in_array('finorder', $nubar))$arr['finorder']= m('finorder')->rows('`ispay` in(0,2,4)');
+		}
 		
 		foreach($arr as $k=>$v)if($v==0)unset($arr[$k]);
 		return $arr;
@@ -138,7 +141,10 @@ class homeitemsClassModel extends Model
 	//系统日志
 	public function get_syslog_arr()
 	{
-		return m('log')->getrows('1=1','type,remark,optdt,level','id desc limit 5');
+		$dbs  = m('log');
+		$dbs->readPHPerr();
+		$rows = $dbs->getrows('1=1','type,remark,optdt,level','id desc limit 5');
+		return $rows;
 	}
 	
 	//考勤打卡的

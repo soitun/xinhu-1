@@ -11,7 +11,8 @@
 <script type="text/javascript" src="js/js.js"></script>
 <script type="text/javascript" src="js/jswx.js?<?=time()?>"></script>
 <script type="text/javascript" src="js/base64-min.js"></script>
-<script charset="utf-8" src="https://map.qq.com/api/gljs?v=1.exp&key=<?=$da['qqmapkey']?>&libraries=geometry"></script>
+<script src="https://api.tianditu.gov.cn/api?v=4.0&tk=<?=c('tianditu')->getKey()?>"></script>
+<script src="js/jsmap.js"></script>
 <script type="text/javascript" src="js/dingwei.js?<?=time()?>"></script>
 <style>
 <?php
@@ -31,7 +32,7 @@ if(method_exists($colobj,'colorTorgb')){
 var kqrs = <?=json_encode($kqrs);?>,kqors = <?=json_encode($kqors);?>,kqallrs=[],isgzh = <?=$isgzh?>;
 js.servernow = '<?=$rock->now?>',openfrom='<?=$openfrom?>';
 
-var label='',accuracy=0,latitude='',longitude='',kqjuli=-1,addbo = true,explain='',dakaci=1;
+var label='',accuracy=0,latitude='',longitude='',kqjuli=-1,addbo = true,explain='',dakaci=1,xytype=0;
 
 function initbody(){
 	js.getsplit();
@@ -112,8 +113,16 @@ js.dw.ondwerr=function(msg){
 
 //定位成功后回调
 js.dw.ondwcall = function(res){
+	xytype		= 1;
 	latitude 	= res.latitude;
 	longitude 	= res.longitude;
+	
+	if(res.xxtype != '1'){
+		var wgs = gcj02ToWgs84(longitude, latitude);
+		longitude = wgs.lon;
+		latitude = wgs.lat;
+	}
+	
 	accuracy 	= res.accuracy;
 	label		= res.address;
 	
@@ -151,6 +160,7 @@ function isfenwein(){
 	kqwucha = slju;
 	return iskqbo;
 }
+
 var addkaoqinbool=false,upfileid='';
 function addkaoqin(o1, lbos){
 	if((js.now('time') - nowtimetime)>60*1000){
@@ -189,7 +199,7 @@ function adddk(ts, lx){
 	var o1 = get('dkbtn');
 	$(o1).html(''+ts+'中...');
 	var ispz = (kqrs) ? kqrs.ispz : '0';
-	var data = {location_x:latitude,type:lx,location_y:longitude,scale:12,fileid:upfileid,precision:accuracy,label:jm.base64encode(label),sm:jm.base64encode(explain),ispz:ispz};
+	var data = {location_x:latitude,type:lx,location_y:longitude,scale:12,fileid:upfileid,precision:accuracy,label:jm.base64encode(label),sm:jm.base64encode(explain),ispz:ispz,xytype:xytype};
 	addkaoqinbool = true;
 	js.ajax('weixin','addlocation',data,function(ret){
 		js.wx.unload();
@@ -216,8 +226,13 @@ function changetab(lx){
 	var url='?d=we&m=ying&a=location';
 	if(lx==2)url='?m=ying&d=we&num=kqtotal';
 	if(lx==3)url='?m=ying&d=we&num=kqpai';
-	js.location(url);
+	if(apicloud){
+		api.openWin({url:NOWURL+url});
+	}else{
+		js.location(url);
+	}
 }
+
 
 
 function paizhao33(){
